@@ -832,6 +832,15 @@ transpobot/
 
   <p>L'expérience a également mis en évidence l'importance critique du <strong>Prompt Engineering</strong> : la qualité du schéma injecté dans le contexte LLM et la précision des règles métier définies dans le prompt système sont le facteur déterminant de la fiabilité des requêtes générées. Une ambiguïté dans le schéma se traduit directement par des hallucinations de colonnes inexistantes.</p>
 
+  <h2 class="subsection-title">Difficultés rencontrées et solutions apportées</h2>
+  <p>Le développement d'une architecture full-stack intégrant de l'IA a naturellement posé plusieurs défis techniques majeurs, que nous avons su surmonter :</p>
+  <ul>
+    <li><strong>Hallucinations SQL du LLM :</strong> Le modèle LLaMA-3 avait initialement tendance à inventer des noms de colonnes ou à générer des requêtes <code>UPDATE</code>. <em>Solution : Injection du schéma SQL millimétré dans le prompt système, passage à une température de 0.0, et forçage logiciel du préfixe <code>SELECT</code> côté backend.</em></li>
+    <li><strong>Cold Start de l'API (Latence) :</strong> Le déploiement sur les instances gratuites de Render entraînait un "spin-down" (mise en veille) et des démarrages de plus de 45 secondes. <em>Solution : Mise en place d'un script "Keep-Alive" exécuté toutes les 11 minutes via le Cron d'AlwaysData pour maintenir l'API éveillée 24/7.</em></li>
+    <li><strong>Asynchronisme et cohérence des ENUMs :</strong> Des rejets SQL se produisaient en raison de légères différences de typage entre le front, Pydantic et MySQL (ex: <code>panne</code> vs <code>en_panne</code>). <em>Solution : Audit complet de la base, standardisation des ENUMs et ajout de validateurs <code>Literal[]</code> stricts dans les modèles Pydantic.</em></li>
+    <li><strong>Superposition UI (Conflits CSS) :</strong> Le module "Spotlight" de l'IA (chatbot) interceptait involontairement les clics destinés au tableau de bord sous-jacent. <em>Solution : Refonte de la logique des couches avec des classes d'isolation et la propriété CSS <code>pointer-events: none</code> dynamique.</em></li>
+  </ul>
+
   <h2 class="subsection-title">Perspectives d'évolution</h2>
   <p>Plusieurs axes d'amélioration ont été identifiés pour de futures versions du système :</p>
   <ul>
