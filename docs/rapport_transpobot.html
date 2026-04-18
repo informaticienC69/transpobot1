@@ -789,17 +789,24 @@ transpobot/
   <h2 class="subsection-title">VII.1 Tests Fonctionnels (CRUD & Métier)</h2>
   <p>Nous avons validé de bout en bout le processus métier principal : l'ajout d'une nouvelle entité (véhicule ou trajet) et sa répercussion immédiate sur les indicateurs de performance (KPI) du tableau de bord.</p>
   
-  <div class="figure-placeholder" style="min-height:50px;">📸 [EN ATTENTE : Capture 1 - Création réussie]</div>
-  <p class="figure-caption">Figure 9 — Test de bout en bout : Notification de succès lors d'une opération d'écriture en BDD</p>
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/crud_succes.png" alt="Notification de succès CRUD" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
+  </div>
+  <p class="figure-caption">Figure 9 — Test de bout en bout : Notification de succès (Toast) lors d'une opération d'écriture en BDD</p>
 
-  <div class="figure-placeholder" style="min-height:50px;">📸 [EN ATTENTE : Capture 2 - Mise à jour KPI Dashboard]</div>
-  <p class="figure-caption">Figure 10 — Test d'intégration : Actualisation instantanée des KPI de gestion après l'opération</p>
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/dashboard_kpi.png" alt="Tableau de bord Transpobot KPI" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
+  </div>
+  <p class="figure-caption">Figure 10 — Test d'intégration : Actualisation instantanée des KPI de gestion sur le Dashboard</p>
 
   <h2 class="subsection-title">VII.2 Tests de Robustesse & Cybersécurité</h2>
   <p>Les vulnérabilités classiques (Brute Force, Cross-Site Scripting, accès hors privilèges) ont fait l'objet de tests red-team. Nous illustrons ici le bouclier anti-Brute Force bloquant un attaquant tentant de forcer l'accès d'un compte agent.</p>
 
-  <div class="figure-placeholder" style="min-height:50px;">📸 [EN ATTENTE : Capture 3 - Blocage Brute Force]</div>
-  <p class="figure-caption">Figure 11 — Test de robustesse : Déclenchement de la sécurité bloquant le compte après N tentatives</p>
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/login_refuse.png" alt="Blocage accès anti-brute force" style="width:48%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc; display:inline-block; vertical-align:top; margin-right:1%;">
+    <img src="images/soc_logs.png" alt="Interface SOC - Logs sécurité" style="width:48%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc; display:inline-block; vertical-align:top; margin-left:1%;">
+  </div>
+  <p class="figure-caption">Figure 11 — Test de robustesse : Déclenchement du blocage IP (à gauche) et alerte dans le journal SOC SuperAdmin (à droite)</p>
 </div>
 
 <!-- ════════════════════════════════════════
