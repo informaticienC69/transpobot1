@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport TranspoBot — UCAD/ESP DIC1</title>
+<link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ══════════════════════════════════════════
+     RESET & BASE
+  ══════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.7;
+    color: #1a1a1a;
+    background: #f0f0f0;
+  }
+
+  /* ══════════════════════════════════════════
+     PAGE A4
+  ══════════════════════════════════════════ */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    background: white;
+    padding: 25mm 25mm 20mm 30mm;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    position: relative;
+  }
+
+  /* ══════════════════════════════════════════
+     PRINT
+  ══════════════════════════════════════════ */
+  @media print {
+    body { background: white; }
+    .page {
+      margin: 0; padding: 25mm 25mm 20mm 30mm;
+      box-shadow: none; width: 100%;
+    }
+    .page-break { page-break-before: always; }
+    .no-print { display: none; }
+  }
+  @page { size: A4; margin: 0; }
+
+  /* ══════════════════════════════════════════
+     PAGE DE GARDE
+  ══════════════════════════════════════════ */
+  .cover { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 250mm; }
+  .cover-top { text-align: center; margin-bottom: 10px; }
+  .cover-univ { font-size: 14pt; font-weight: bold; text-transform: uppercase; margin-bottom: 18px; letter-spacing: 0.3px; }
+  .cover-logo { width: 110px; height: 110px; object-fit: contain; margin: 10px auto 18px; display: block; }
+  .cover-logo-placeholder {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: linear-gradient(135deg, #1565C0, #0277BD);
+    display: flex; align-items: center; justify-content: center;
+    margin: 10px auto 18px;
+    color: white; font-size: 10pt; font-weight: bold; text-align: center;
+    letter-spacing: 1px; padding: 10px;
+  }
+  .cover-school { font-size: 14pt; font-weight: bold; margin-bottom: 6px; }
+  .cover-dept { font-size: 13pt; font-weight: bold; margin-bottom: 20px; }
+  .cover-diplome { font-size: 12pt; font-weight: bold; margin-bottom: 4px; }
+  .cover-module { font-size: 11pt; color: #1565C0; margin-bottom: 20px; }
+  .cover-separator { border: none; border-top: 2px solid #333; width: 100%; margin: 12px 0; }
+  .cover-theme-label { font-size: 13pt; font-style: italic; margin-bottom: 6px; }
+  .cover-theme { font-size: 13pt; font-weight: bold; margin-bottom: 0; }
+  .cover-bottom { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-top: 40px; text-align: left; }
+  .cover-students h3, .cover-teacher h3 { font-size: 11pt; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #aaa; padding-bottom: 3px; }
+  .cover-students ul { list-style: none; font-size: 11pt; line-height: 2; }
+  .cover-teacher p { font-size: 11pt; line-height: 2; }
+  .cover-year { text-align: center; margin-top: 25px; font-size: 11pt; color: #444; }
+
+  /* ══════════════════════════════════════════
+     TABLE DES MATIÈRES
+  ══════════════════════════════════════════ */
+  .toc-title { font-size: 16pt; font-weight: bold; margin-bottom: 20px; text-align: center; text-transform: uppercase; border-bottom: 2px solid #1565C0; padding-bottom: 8px; }
+  .toc-list { list-style: none; }
+  .toc-list li { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 1px dotted #bbb; font-size: 11pt; margin-bottom: 2px; }
+  .toc-list li.toc-h1 { font-weight: bold; font-size: 12pt; margin-top: 8px; }
+  .toc-list li.toc-h2 { padding-left: 25px; font-size: 11pt; }
+  .toc-list li.toc-h2 a { color: #333; }
+  .toc-list a { text-decoration: none; color: #1a1a1a; }
+  .toc-list a:hover { color: #1565C0; }
+  .toc-page { font-size: 10pt; color: #666; white-space: nowrap; margin-left: 10px; }
+
+  /* ══════════════════════════════════════════
+     TITRES
+  ══════════════════════════════════════════ */
+  h1.section-title {
+    font-size: 16pt; font-weight: bold; text-transform: uppercase;
+    color: white; background: #1565C0;
+    padding: 8px 15px; border-radius: 4px;
+    margin: 25px 0 18px; letter-spacing: 0.5px;
+  }
+  h2.subsection-title {
+    font-size: 13pt; font-weight: bold; color: #1565C0;
+    border-left: 4px solid #1565C0; padding-left: 10px;
+    margin: 18px 0 10px;
+  }
+  h3.subsubsection-title {
+    font-size: 12pt; font-weight: bold; color: #333;
+    margin: 14px 0 8px;
+  }
+
+  /* ══════════════════════════════════════════
+     INTRO TITLE
+  ══════════════════════════════════════════ */
+  h1.intro-title {
+    font-size: 16pt; font-weight: bold; text-transform: uppercase;
+    color: #1565C0; text-align: center;
+    border-bottom: 2px solid #1565C0; padding-bottom: 8px;
+    margin: 0 0 20px;
+  }
+
+  /* ══════════════════════════════════════════
+     PARAGRAPHES & LISTES
+  ══════════════════════════════════════════ */
+  p { margin-bottom: 10px; text-align: justify; }
+  ul, ol { margin: 8px 0 10px 25px; }
+  ul li, ol li { margin-bottom: 4px; }
+
+  /* ══════════════════════════════════════════
+     TABLEAUX
+  ══════════════════════════════════════════ */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 10pt; }
+  thead tr { background: #1565C0; color: white; }
+  th { padding: 7px 8px; text-align: left; font-weight: 600; font-size: 10pt; }
+  td { padding: 5px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) { background: #f5f7fa; }
+  .table-caption { font-size: 10pt; color: #555; text-align: center; margin-top: -10px; margin-bottom: 14px; font-style: italic; }
+
+  /* ══════════════════════════════════════════
+     TAGS & BADGES
+  ══════════════════════════════════════════ */
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 8.5pt; font-weight: bold; font-family: 'Courier New', monospace; }
+  .tag-pk { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+  .tag-fk { background: #ede7f6; color: #4527a0; border: 1px solid #b39ddb; }
+  .tag-nn { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .tag-uq { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+  .tag-new { background: #fffde7; color: #f57f17; border: 1px solid #ffe082; }
+
+  /* ══════════════════════════════════════════
+     CODE
+  ══════════════════════════════════════════ */
+  pre {
+    background: #1e2433; color: #e8eaf6;
+    font-family: 'Courier New', monospace; font-size: 9pt;
+    padding: 12px 15px; border-radius: 6px;
+    margin: 10px 0 14px; overflow-x: auto;
+    line-height: 1.6; border-left: 4px solid #1565C0;
+  }
+  code { font-family: 'Courier New', monospace; font-size: 9.5pt; background: #f0f4fa; padding: 1px 5px; border-radius: 3px; color: #b45309; }
+
+  /* ══════════════════════════════════════════
+     ALERTES & ENCADRÉS
+  ══════════════════════════════════════════ */
+  .callout {
+    border-left: 4px solid #1565C0; background: #e3f2fd;
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    margin: 12px 0; font-size: 11pt;
+  }
+  .callout.orange { border-color: #e65100; background: #fff3e0; }
+  .callout.green { border-color: #2e7d32; background: #e8f5e9; }
+  .callout strong { font-weight: bold; }
+
+  /* ══════════════════════════════════════════
+     FIGURES
+  ══════════════════════════════════════════ */
+  .figure-placeholder {
+    border: 2px dashed #90caf9; background: #e3f2fd;
+    border-radius: 8px; padding: 30px; text-align: center;
+    color: #1565C0; font-style: italic; margin: 14px 0;
+    min-height: 80px; display: flex; align-items: center; justify-content: center;
+  }
+  .figure-caption { text-align: center; font-size: 10pt; color: #555; font-style: italic; margin-top: -8px; margin-bottom: 14px; }
+
+  /* ══════════════════════════════════════════
+     FOOTER PAGE
+  ══════════════════════════════════════════ */
+  .page-footer {
+    position: absolute; bottom: 15mm; left: 30mm; right: 25mm;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid #ddd; padding-top: 6px;
+    font-size: 9pt; color: #999;
+  }
+
+  /* ══════════════════════════════════════════
+     TABLE DES MATIÈRES SECTION
+  ══════════════════════════════════════════ */
+  .section-header { margin-bottom: 6px; }
+
+  /* Print button */
+  .print-btn {
+    position: fixed; bottom: 30px; right: 30px; z-index: 999;
+    background: #1565C0; color: white; border: none; border-radius: 50px;
+    padding: 12px 24px; font-size: 13pt; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(21,101,192,0.4); font-family: 'Inter', sans-serif;
+  }
+  .print-btn:hover { background: #0d47a1; }
+
+  /* Liens vers documents annexes */
+  .doc-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #e3f2fd; border: 1.5px solid #1565C0;
+    color: #1565C0; padding: 8px 16px; border-radius: 6px;
+    text-decoration: none; font-size: 11pt; font-weight: 600;
+    margin: 8px 4px; font-family: 'Inter', sans-serif;
+    transition: background .2s;
+  }
+  .doc-link:hover { background: #bbdefb; }
+  @media print { .doc-link { border-color: #888; color: #333; } }
+
+  /* Badges fonctionnalités */
+  .badge-req {
+    display:inline-block; background:#1565C0; color:white;
+    padding:2px 10px; border-radius:12px; font-size:9pt;
+    font-family:'Inter',sans-serif; font-weight:700;
+    vertical-align:middle; margin-right:6px; letter-spacing:.3px;
+  }
+  .badge-sup {
+    display:inline-block; background:#2e7d32; color:white;
+    padding:2px 10px; border-radius:12px; font-size:9pt;
+    font-family:'Inter',sans-serif; font-weight:700;
+    vertical-align:middle; margin-right:6px; letter-spacing:.3px;
+  }
+  .fonc-box {
+    border-left: 3px solid #1565C0; background:#f5f7fa;
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    margin: 10px 0;
+  }
+  .fonc-box.sup { border-color:#2e7d32; background:#f1f8f2; }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">🖨️ Imprimer / PDF</button>
+
+<!-- ════════════════════════════════════════
+  PAGE DE GARDE
+════════════════════════════════════════ -->
+<div class="page">
+  <div class="cover">
+    <div class="cover-top" style="width:100%">
+      <p class="cover-univ">Université Cheikh Anta Diop de Dakar</p>
+
+      <!-- Logo UCAD — remplacer ucad.png par votre fichier -->
+      <img src="images/ucad.png" alt="Logo UCAD" class="cover-logo"
+           onerror="this.style.display='none';document.getElementById('logo-ph').style.display='flex';">
+      <div id="logo-ph" class="cover-logo-placeholder" style="display:none;">UCAD<br/>ESP</div>
+
+      <p class="cover-school">École Supérieure Polytechnique de Dakar</p>
+      <p class="cover-dept">Département Génie Informatique</p>
+      <hr class="cover-separator" style="margin:14px 0;">
+      <p class="cover-diplome">Diplôme d'Ingénieur en Génie Informatique 1<sup>ère</sup> Année (DIC1)</p>
+      <p class="cover-module">Projet de fin de module SGBD &amp; Intégration IA</p>
+    </div>
+
+    <div style="width:100%">
+      <hr class="cover-separator">
+      <p class="cover-theme-label"><em>Thème :</em></p>
+      <p class="cover-theme">TranspoBot — Application de Gestion de Transport Urbain<br>avec Assistant Conversationnel IA (Text-to-SQL)</p>
+      <hr class="cover-separator">
+    </div>
+
+    <div class="cover-bottom">
+      <div class="cover-students">
+        <h3>Étudiants :</h3>
+        <ul>
+          <li>Hady KALOGA</li>
+          <li>Aicha Baba LY</li>
+          <li>Cheikh Saliou Mbacke LO</li>
+          <li>Mame Aita Ndoye</li>
+        </ul>
+      </div>
+      <div class="cover-teacher" style="text-align:right;">
+        <h3>Enseignant :</h3>
+        <p>Pr. Amath Bamba MBACKE</p>
+      </div>
+    </div>
+
+    <p class="cover-year">Année académique 2024 — 2025</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+  TABLE DES MATIÈRES
+════════════════════════════════════════ -->
+<div class="page page-break">
+  <h2 class="toc-title">Table des Matières</h2>
+  <ul class="toc-list">
+    <li class="toc-h1"><a href="#introduction">Introduction</a><span class="toc-page">3</span></li>
+
+    <li class="toc-h1"><a href="#chap1">I. Modélisation</a><span class="toc-page">4</span></li>
+    <li class="toc-h2"><a href="#chap1-1">I.1 Dictionnaire de données</a><span class="toc-page">4</span></li>
+    <li class="toc-h2"><a href="#chap1-2">I.2 Modèle Conceptuel de Données (MCD)</a><span class="toc-page">8</span></li>
+    <li class="toc-h2"><a href="#chap1-3">I.3 Modèle Logique de Données (MLD)</a><span class="toc-page">9</span></li>
+
+    <li class="toc-h1"><a href="#chap2">II. Architecture Technique</a><span class="toc-page">10</span></li>
+    <li class="toc-h2"><a href="#chap2-1">II.1 Choix technologiques et justifications</a><span class="toc-page">10</span></li>
+    <li class="toc-h2"><a href="#chap2-2">II.2 Schéma d'architecture globale</a><span class="toc-page">11</span></li>
+    <li class="toc-h2"><a href="#chap2-3">II.3 Structure du projet</a><span class="toc-page">12</span></li>
+
+    <li class="toc-h1"><a href="#chap3">III. Description des Fonctionnalités Développées</a><span class="toc-page">13</span></li>
+    <li class="toc-h2"><a href="#chap3-1">III.1 Authentification et gestion des accès</a><span class="toc-page">13</span></li>
+    <li class="toc-h2"><a href="#chap3-2">III.2 Gestion de la flotte de véhicules</a><span class="toc-page">14</span></li>
+    <li class="toc-h2"><a href="#chap3-3">III.3 Gestion des chauffeurs</a><span class="toc-page">14</span></li>
+    <li class="toc-h2"><a href="#chap3-4">III.4 Gestion des trajets</a><span class="toc-page">15</span></li>
+    <li class="toc-h2"><a href="#chap3-5">III.5 Gestion des incidents et maintenances</a><span class="toc-page">15</span></li>
+    <li class="toc-h2"><a href="#chap3-6">III.6 Assistant IA conversationnel (Text-to-SQL)</a><span class="toc-page">16</span></li>
+    <li class="toc-h2"><a href="#chap3-7">III.7 Portail SuperAdmin</a><span class="toc-page">16</span></li>
+
+    <li class="toc-h1"><a href="#chap4">IV. Prompt Engineering</a></li>
+    <li class="toc-h2"><a href="#chap4-1">IV.1 Appel #1 : Génération SQL sécurisée</a></li>
+    <li class="toc-h2"><a href="#chap4-2">IV.2 Appel #2 : Synthèse narrative</a></li>
+
+    <li class="toc-h1"><a href="#chap5">V. Exemples de requêtes SQL générées</a></li>
+    <li class="toc-h1"><a href="#chap6">VI. Déploiement et Sécurisation</a></li>
+    <li class="toc-h1"><a href="#chap7">VII. Validation et Scénarios de Test</a></li>
+    <li class="toc-h1"><a href="#chap8">VIII. Conclusion et Perspectives</a></li>
+  </ul>
+</div>
+
+<!-- ════════════════════════════════════════
+  INTRODUCTION
+════════════════════════════════════════ -->
+<div class="page page-break" id="introduction">
+  <h1 class="intro-title">Introduction</h1>
+
+  <p>Dans le cadre du cours d'intégration de l'Intelligence Artificielle dans les Systèmes d'Information (Licence 3 GLSi — DIC1), nous avons conçu et réalisé <strong>TranspoBot</strong>, une application web complète de gestion de transport urbain intégrant un assistant conversationnel basé sur un Grand Modèle de Langage (LLM).</p>
+
+  <p>Le secteur du transport urbain génère d'importants volumes de données opérationnelles — gestion de flottes, trajets, chauffeurs, incidents — dont l'exploitation analytique reste souvent difficile d'accès pour les gestionnaires non techniciens. La compréhension de ces données nécessite généralement la maîtrise du langage SQL, ce qui représente une barrière technique significative.</p>
+
+  <p><strong>TranspoBot</strong> répond à cette problématique en proposant une interface unifiée permettant de :</p>
+  <ul>
+    <li>Gérer l'ensemble des opérations de transport via un tableau de bord interactif (CRUD complet) ;</li>
+    <li>Interroger la base de données en <strong>langage naturel</strong> grâce à un chatbot IA intégré, sans connaissances SQL préalables ;</li>
+    <li>Superviser l'ensemble du système via un portail d'administration dédié au SuperAdmin.</li>
+  </ul>
+
+  <p>Le projet mobilise un ensemble cohérent de technologies modernes : <strong>Python/FastAPI</strong> pour le backend, <strong>MySQL 8.0</strong> pour la persistance des données, <strong>Groq API (LLaMA-3.3-70b)</strong> pour l'intelligence artificielle, et <strong>HTML/CSS/JS Vanilla</strong> pour l'interface utilisateur. L'application est déployée en production sur <strong>Render</strong> (backend) et <strong>AlwaysData</strong> (base de données).</p>
+
+  <p>Ce rapport présente l'ensemble des travaux réalisés, de la modélisation de la base de données à l'ingénierie des prompts, en passant par l'architecture technique et la description des fonctionnalités développées.</p>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE I — MODÉLISATION
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap1">
+  <h1 class="section-title">I. Modélisation</h1>
+
+  <p>La modélisation constitue le fondement de l'application TranspoBot. Elle garantit que les données métier — véhicules, chauffeurs, trajets, incidents — sont organisées de manière cohérente, intègre et exploitable aussi bien par les formulaires CRUD que par l'assistant IA.</p>
+
+  <!-- I.1 DICTIONNAIRE DE DONNÉES -->
+  <h2 class="subsection-title" id="chap1-1">I.1 Dictionnaire de données</h2>
+  <div class="callout">
+    <p>La base de données <code>informaticienc_transpobot</code> comprend <strong>13 tables SQL</strong>. Afin de synthétiser ce rapport et d'alléger la lecture, l'intégralité du dictionnaire des données (tous les attributs, types SQL et contraintes) a été déportée dans un document interactif dédié.</p>
+    <div style="text-align:center;margin:14px 0 8px;">
+      <a href="https://informaticienC69.github.io/transpobot1/mld.html" target="_blank" class="doc-link">📋 Consulter le Dictionnaire de données complet &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<!-- MCD -->
+<div class="page page-break" id="chap1-2">
+  <h2 class="subsection-title">I.2 Modèle Conceptuel de Données (MCD)</h2>
+  <p>Le MCD représente le niveau conceptuel de la modélisation, selon la notation Merise. Il identifie les entités du domaine métier, leurs attributs et les associations qui les relient, indépendamment de toute considération d'implémentation technique.</p>
+  <p>Le modèle TranspoBot comporte <strong>12 entités</strong> et <strong>10 associations</strong> :</p>
+
+  <div style="text-align:center;margin:18px 0 8px;">
+    <a href="https://informaticienC69.github.io/transpobot1/mcd.html" target="_blank" class="doc-link">📊 Consulter le diagramme MCD interactif complet &rarr;</a>
+  </div>
+  <div class="callout" style="font-size:10pt;margin-top:4px">
+    <strong>Note impression :</strong> Pour inclure le MCD dans le PDF, ouvrir <code>mcd.html</code> (lien ci-dessus) dans Chrome et utiliser Ctrl+P &rarr; <em>Enregistrer en PDF</em>, puis insérer la capture en annexe.
+  </div>
+  <p class="figure-caption">Figure 1 — Modèle Conceptuel de Données (Notation Merise) — <a href="https://informaticienC69.github.io/transpobot1/mcd.html" target="_blank" style="color:#1565C0">mcd.html</a></p>
+
+  <h3 class="subsubsection-title">Principales associations et cardinalités</h3>
+  <table>
+    <thead><tr><th>#</th><th>Association</th><th>Cardinalités</th><th>Lecture</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td>VÉHICULE — <em>conduit</em> — CHAUFFEUR</td><td>(0,N) : (0,1)</td><td>Un véhicule est attribué à 0 ou 1 chauffeur. Un chauffeur peut avoir conduit 0 ou N véhicules.</td></tr>
+      <tr><td>②</td><td>VÉHICULE — <em>utilise</em> — TRAJET</td><td>(0,N) : (1,1)</td><td>Un trajet utilise exactement 1 véhicule.</td></tr>
+      <tr><td>③</td><td>VÉHICULE — <em>subit</em> — MAINTENANCE</td><td>(0,N) : (1,1)</td><td>Une maintenance concerne exactement 1 véhicule.</td></tr>
+      <tr><td>④</td><td>CHAUFFEUR — <em>effectue</em> — TRAJET</td><td>(0,N) : (1,1)</td><td>Un trajet est effectué par exactement 1 chauffeur.</td></tr>
+      <tr><td>⑤</td><td>TRAJET — <em>planifie</em> — LIGNE</td><td>(1,1) : (1,N)</td><td>Un trajet appartient à exactement 1 ligne.</td></tr>
+      <tr><td>⑥</td><td>LIGNE — <em>applique</em> — TARIF</td><td>(1,N) : (1,1)</td><td>Une ligne définit 1 ou N tarifs (normal / étudiant / senior).</td></tr>
+      <tr><td>⑦</td><td>LIGNE — <em>passe_par</em> — ARRET</td><td>(1,N) : (0,N)</td><td>Association N:M → table <code>ligne_arrets</code> avec attributs ordre et temps_estime.</td></tr>
+      <tr><td>⑧</td><td>TRAJET — <em>génère</em> — INCIDENT</td><td>(0,N) : (1,1)</td><td>Un incident est lié à exactement 1 trajet.</td></tr>
+      <tr><td>⑨</td><td>LIGNE — <em>définit</em> — HORAIRE</td><td>(1,N) : (1,1)</td><td>Un horaire appartient à 1 ligne. Une ligne a 1 ou N horaires.</td></tr>
+      <tr><td>⑩</td><td>UTILISATEUR — <em>génère</em> — LOGS_REQUETES</td><td>(1,1) : (0,N)</td><td>Un log appartient à 1 utilisateur. Un utilisateur génère 0 ou N requêtes IA.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MLD -->
+<div class="page page-break" id="chap1-3">
+  <h2 class="subsection-title">I.3 Modèle Logique de Données (MLD)</h2>
+  <p>Le MLD traduit le MCD en un schéma relationnel exploitable par MySQL. Les clés étrangères remplacent les associations, et les tables d'association N:M deviennent des relations à part entière (ex: <code>ligne_arrets</code>). De plus, deux triggers MySQL (déclencheurs automatiques) gèrent le calcul automatique de la recette passagers pour éviter les erreurs humaines.</p>
+
+  <div style="text-align:center;margin:18px 0 8px;">
+    <a href="https://informaticienC69.github.io/transpobot1/mld.html" target="_blank" class="doc-link">📋 Consulter le diagramme MLD complet interactif &rarr;</a>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE II — ARCHITECTURE TECHNIQUE
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap2">
+  <h1 class="section-title">II. Architecture Technique</h1>
+
+  <h2 class="subsection-title" id="chap2-1">II.1 Choix technologiques et justifications</h2>
+  <p>L'architecture de TranspoBot repose sur un ensemble de technologies sélectionnées pour leur complémentarité, leur performance et leur adéquation au contexte académique et opérationnel du projet.</p>
+
+  <table>
+    <thead><tr><th>Couche</th><th>Technologie</th><th>Justification</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Frontend</strong></td>
+        <td>HTML5 / CSS3 / JavaScript Vanilla</td>
+        <td>Choix de la légèreté face à React/Vue : pas de surcoût de compilation, déploiement immédiat. Charts.js pour les graphiques KPI, GSAP pour les animations, Alpine.js pour la réactivité légère.</td>
+      </tr>
+      <tr>
+        <td><strong>Backend</strong></td>
+        <td>Python 3.11 / FastAPI</td>
+        <td>Mode asynchrone (<code>async/await</code>) indispensable pour interroger MySQL et le LLM Groq simultanément sans blocage. Validation automatique des données via Pydantic. Écosystème IA Python le plus mature.</td>
+      </tr>
+      <tr>
+        <td><strong>Base de données</strong></td>
+        <td>MySQL 8.0</td>
+        <td>SGBD relationnel robuste, contraintes FK strictes, triggers natifs pour le calcul automatique des recettes. Hébergé sur AlwaysData (production).</td>
+      </tr>
+      <tr>
+        <td><strong>IA / LLM</strong></td>
+        <td>Groq API — LLaMA-3.3-70b-versatile</td>
+        <td>API gratuite à haute performance (inférence LPU). Modèle open-source de Meta, température 0.0 pour SQL (déterministe), 0.4 pour la réponse narrative. SDK Python <code>groq</code> utilisé directement.</td>
+      </tr>
+      <tr>
+        <td><strong>Authentification</strong></td>
+        <td>JWT (JSON Web Tokens) + bcrypt</td>
+        <td>Tokens signés HS256, expiration 8h, rôles admin/gestionnaire/lecteur. Mots de passe hashés bcrypt (facteur de coût 12). Portail SuperAdmin avec JWT distinct.</td>
+      </tr>
+      <tr>
+        <td><strong>Déploiement</strong></td>
+        <td>Render (backend) + AlwaysData (MySQL)</td>
+        <td>Render : déploiement automatique depuis GitHub (CI/CD), HTTPS managé, 750h gratuites/mois. AlwaysData : MySQL persistant, 100 Mo gratuits, connexion SSL depuis Render.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="subsection-title" id="chap2-2">II.2 Schéma d'architecture globale</h2>
+  <p>L'architecture de TranspoBot suit de manière stricte un modèle client-serveur moderne, propulsé par une surcouche d'Intelligence Artificielle en cloud.</p>
+  <p>Le Dashboard interagite avec une API FastAPI qui orchestre la communication entre la persistance des données sur MySQL et le pipeline cognitif sur l'API Groq (moteur d'inférence LLaMA-3).</p>
+
+  <div style="text-align:center;margin:18px 0 24px;">
+    <a href="https://informaticienC69.github.io/transpobot1/architecture_transpobot.html" target="_blank" class="doc-link">🏗️ Consulter le Schéma d'Architecture global interactif &rarr;</a>
+  </div>
+</div>
+
+<div class="page page-break" id="chap2-3">
+  <h2 class="subsection-title">II.3 Structure du projet</h2>
+  <p>Le projet est organisé en deux répertoires principaux : <code>backend/</code> et <code>frontend/</code>.</p>
+
+  <pre>
+transpobot/
+├── backend/
+│   ├── main.py                  # Point d'entrée FastAPI + CORS + routeurs
+│   ├── config.py                # Variables d'environnement (DB, Groq, JWT)
+│   ├── database.py              # Connexion MySQL (pool de connexions)
+│   ├── routes/
+│   │   ├── auth.py              # /api/auth/* — Login, invitation, activation
+│   │   ├── crud.py              # /api/* — CRUD véhicules, chauffeurs, trajets...
+│   │   ├── ia.py                # /api/ia/* — Assistant Text-to-SQL
+│   │   └── superadmin.py        # /api/superadmin/* — Portail administration
+│   └── services/
+│       └── llm_service.py       # Logique Groq : generate_sql_query() + generate_nl_response()
+├── frontend/
+│   ├── index.html               # Page de connexion
+│   ├── dashboard.html           # Application principale (SPA)
+│   ├── superadmin.html          # Portail SuperAdmin
+│   └── app.js                   # Logique JS complète (CRUD + IA + Charts)
+├── init_alwaysdata.sql          # Script d'initialisation BDD (idempotent, 13 tables)
+├── render.yaml                  # Configuration déploiement Render
+└── requirements.txt             # Dépendances Python</pre>
+
+  <div class="callout green">
+    <strong>Architecture REST :</strong> Toutes les routes API suivent la convention REST. Les routes CRUD sont protégées par JWT (rôle admin/gestionnaire). Les routes SuperAdmin utilisent un token JWT distinct avec rôle <code>superadmin</code>. La route IA (<code>/api/ia/query</code>) est accessible à tous les rôles authentifiés.
+  </div>
+
+  <h3 class="subsubsection-title">Sécurité de l'API</h3>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>JWT HS256</td><td>Tokens signés avec secret partagé, expiration 8h. Validation sur chaque requête protégée.</td></tr>
+      <tr><td>bcrypt</td><td>Hachage des mots de passe avec facteur de coût 12. Jamais de mot de passe en clair en base.</td></tr>
+      <tr><td>RBAC</td><td>Contrôle d'accès basé sur les rôles : admin (accès total), gestionnaire (CRUD opérationnel), lecteur (lecture seule).</td></tr>
+      <tr><td>Anti-injection SQL</td><td>L'IA ne peut générer que des <code>SELECT</code>. Tout <code>DELETE/UPDATE/INSERT</code> est bloqué côté backend avant exécution.</td></tr>
+      <tr><td>Logs sécurité</td><td>Chaque événement (connexion, échec, blocage brute-force) est enregistré dans <code>logs_securite</code>.</td></tr>
+      <tr><td>CORS</td><td>Origines autorisées configurées via variable d'environnement <code>ALLOWED_ORIGINS</code>.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE III — FONCTIONNALITÉS
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap3">
+  <h1 class="section-title">III. Description des Fonctionnalités Développées</h1>
+
+  <p>TranspoBot dépasse les exigences du cahier des charges en proposant un système complet. Le tableau ci-dessous distingue les <span class="badge-req">REQUISES</span> fonctionnalités imposées du <span class="badge-sup">SUPPLÉMENTAIRES</span> développements additionnels.</p>
+
+  <table>
+    <thead><tr><th>Catégorie</th><th>Fonctionnalité</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Gestion des données</td><td>Affichage liste des véhicules avec statut</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>Gestion des données</td><td>Affichage liste des chauffeurs</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>Gestion des données</td><td>Affichage des trajets récents</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>Gestion des données</td><td>Tableau de bord avec KPI</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>IA conversationnelle</td><td>Questions en langage naturel (FR/EN)</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>IA conversationnelle</td><td>Génération automatique SQL (Text-to-SQL)</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>IA conversationnelle</td><td>Résultats sous forme de tableau</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>IA conversationnelle</td><td>Sécurité SELECT uniquement (pas de modification)</td><td><span class="badge-req">REQUISE</span></td></tr>
+      <tr><td>Gestion données</td><td>CRUD complet véhicules, chauffeurs, trajets, lignes, tarifs, arrêts, horaires</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>Opérations</td><td>Gestion des incidents et des maintenances</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>IA</td><td>Réponse narrative bilingue (2ème appel LLM)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>IA</td><td>Journalisation des requêtes IA (logs_requetes)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>Sécurité</td><td>Authentification JWT + rôles RBAC + invitation par email</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>Sécurité</td><td>Journal de sécurité (logs_securite) + blocage brute-force</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>Administration</td><td>Portail SuperAdmin (5 onglets supervision)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>BDD</td><td>Triggers MySQL (calcul recette automatique)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+      <tr><td>Déploiement</td><td>CI/CD automatique depuis GitHub (Render + AlwaysData)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- III.1 REQUIS -->
+  <h2 class="subsection-title" id="chap3-1">III.1 Fonctionnalités requises (Cahier des charges)</h2>
+
+  <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Tableau de bord avec indicateurs clés (KPI)</h3>
+  <div class="fonc-box">
+    <p>La page d'accueil du Dashboard affiche en temps réel les indicateurs métier essentiels via des cartes KPI :</p>
+    <ul>
+      <li>Nombre total de véhicules actifs / en panne / en maintenance ;</li>
+      <li>Nombre de trajets de la semaine (terminés, planifiés, en cours) ;</li>
+      <li>Taux de ponctualité (ratio trajets sans retard / total trajets terminés) ;</li>
+      <li>Recette hebdomadaire totale en FCFA ;</li>
+      <li>Graphiques Charts.js : répartition des incidents par type, évolution hebdomadaire des recettes.</li>
+    </ul>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Affichage liste des véhicules avec statut</h3>
+  <div class="fonc-box">
+    <p>L'onglet <strong>Flotte</strong> affiche la liste complète des véhicules avec :
+    badge de statut coloré (vert = actif, rouge = en_panne, orange = maintenance, gris = hors_service),
+    filtres en temps réel par type et statut, et indication des alertes kilométriques.</p>
+  </div>
+
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/chat_vehicules.png" alt="Liste des véhicules avec statuts" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
+  </div>
+  <p class="figure-caption">Figure 3 — Assistant IA : Extraction de la liste des véhicules avec statuts</p>
+
+  <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Affichage liste des chauffeurs</h3>
+  <div class="fonc-box">
+    <p>L'onglet <strong>Chauffeurs</strong> présente l'ensemble du personnel roulant avec : nom, prénom, numéro de permis, catégorie, disponibilité (badge vert/rouge), note moyenne sur 5, et véhicule affecté.</p>
+  </div>
+
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/chat_chauffeurs.png" alt="Liste des chauffeurs" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
+  </div>
+  <p class="figure-caption">Figure 4 — Assistant IA : Liste complète des chauffeurs et de leur disponibilité</p>
+
+  <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Affichage des trajets récents</h3>
+  <div class="fonc-box">
+    <p>L'onglet <strong>Trajets</strong> affiche les trajets récents avec : ligne, chauffeur, véhicule, date/heure départ, statut, nombre de passagers, recette et retard. Filtres par statut et par semaine.</p>
+  </div>
+</div>
+
+<div class="page page-break">
+  <!-- III.2 IA REQUISE -->
+  <h2 class="subsection-title" id="chap3-2">III.2 Assistant IA conversationnel — Fonctionnalités requises</h2>
+
+  <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Questions en langage naturel (français ou anglais)</h3>
+  <div class="fonc-box">
+    <p>L'assistant IA accepte des questions formulées librement en français ou en anglais. Le gestionnaire n'a besoin d'aucune connaissance SQL. La langue de la réponse s'adapte automatiquement à la langue détectée dans la question.</p>
+    <p><strong>Exemples de questions acceptées :</strong> <em>« Combien de trajets cette semaine ? »</em> · <em>« Quel chauffeur a le plus d'incidents ? »</em> · <em>« Show me all bus vehicles »</em></p>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Génération automatique SQL (Text-to-SQL)</h3>
+  <div class="fonc-box">
+    <p>Le pipeline Text-to-SQL fonctionne en deux étapes :</p>
+    <ol>
+      <li>La question en langage naturel est envoyée au LLM <strong>LLaMA-3.3-70b</strong> (Groq, température 0.0) avec le schéma BDD complet injecté dans le prompt ;</li>
+      <li>Le LLM retourne une requête SQL <code>SELECT</code> pure, sans markdown, directement exécutable ;</li>
+      <li>Le backend valide que la requête commence par <code>SELECT</code> avant exécution sur MySQL.</li>
+    </ol>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Résultats sous forme de tableau + sécurité SELECT</h3>
+  <div class="fonc-box">
+    <p>Les résultats JSON retournés par MySQL sont affichés dynamiquement sous le chat sous forme de tableau HTML généré en JavaScript. Les colonnes sont détectées automatiquement à partir des clés JSON.</p>
+    <p><strong>Sécurité :</strong> le backend rejette toute requête ne commençant pas par <code>SELECT</code>. Le prompt interdit explicitement <code>DELETE</code>, <code>UPDATE</code>, <code>INSERT</code>, <code>DROP</code>. Le mot de passe (<code>mot_de_passe_hash</code>) est exclu de tout <code>SELECT</code>.</p>
+  </div>
+
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/chat_rejet.png" alt="Rejet IA" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
+  </div>
+  <p class="figure-caption">Figure 5 — Assistant IA conversationnel : Blocage sécuritaire d'une requête de modification (NON_SQL)</p>
+
+  <!-- III.3 SUPPLÉMENTAIRES -->
+  <h2 class="subsection-title" id="chap3-3">III.3 Fonctionnalités supplémentaires développées</h2>
+  <p>Au-delà du cahier des charges, les fonctionnalités suivantes ont été développées pour produire un système complet et robuste :</p>
+
+  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> CRUD complet — Gestion des données</h3>
+  <div class="fonc-box sup">
+    <p>Le cahier des charges exigeait uniquement l'<em>affichage</em> des données. Nous avons implémenté un <strong>CRUD complet</strong> (Create, Read, Update, Delete) pour toutes les entités :</p>
+    <ul>
+      <li><strong>Véhicules</strong> : ajout, modification du statut/kilométrage, suppression avec vérification de dépendances ;</li>
+      <li><strong>Chauffeurs</strong> : ajout, affectation de véhicule, modification de disponibilité ;</li>
+      <li><strong>Trajets</strong> : planification, cycle de vie complet (planifié → en_cours → terminé / annulé), calcul automatique de recette via trigger ;</li>
+      <li><strong>Lignes, arrêts, horaires, tarifs</strong> : gestion complète du réseau de transport.</li>
+    </ul>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Gestion des incidents et maintenances</h3>
+  <div class="fonc-box sup">
+    <ul>
+      <li><strong>Incidents</strong> : signalement avec type, gravité, coût de réparation, résolution. Passage automatique du véhicule en statut <code>en_panne</code> ;</li>
+      <li><strong>Maintenances</strong> : planification préventive/corrective avec suivi technicien et coût en FCFA.</li>
+    </ul>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Authentification sécurisée par invitation</h3>
+  <div class="fonc-box sup">
+    <p>Système d'invitation en 3 étapes : le SuperAdmin crée le compte → un email avec lien d'activation (token valide 48h) est envoyé → l'utilisateur choisit son mot de passe. Connexion via JWT HS256, expiration 8h, rôles RBAC (admin/gestionnaire/lecteur).</p>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Journal de sécurité &amp; Protection brute-force</h3>
+  <div class="fonc-box sup">
+    <p>Chaque événement de sécurité (connexion réussie, échec, tentative brute-force, blocage) est enregistré dans <code>logs_securite</code> avec l'IP source et la géolocalisation estimée. Blocage automatique après N tentatives échouées.</p>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Portail SuperAdmin (5 onglets)</h3>
+  <div class="fonc-box sup">
+    <p>Interface d'administration isolée à <code>/superadmin.html</code>, accessible uniquement avec des identifiants SuperAdmin chargés depuis les variables d'environnement (non stockés en base). Offre 5 onglets : Vue d'ensemble · Journal Sécurité · Logs IA · Sessions actives · Gestion des comptes.</p>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Réponse narrative bilingue (2ème appel LLM)</h3>
+  <div class="fonc-box sup">
+    <p>Au-delà du simple tableau de données requis, un second appel LLM (température 0.4) génère une réponse analytique naturelle <em>comme un vrai analyste</em>. L'utilisateur reçoit donc : une réponse textuelle fluide <strong>et</strong> le tableau de données.</p>
+  </div>
+
+  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Déploiement CI/CD automatique</h3>
+  <div class="fonc-box sup">
+    <p>Intégration GitHub → Render avec déploiement automatique à chaque <code>git push</code> sur <code>main</code>. HTTPS manag, 0 configuration serveur manuelle. Base de données MySQL hébergée sur AlwaysData avec connexion SSL depuis Render.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE IV — PROMPT ENGINEERING
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap4">
+  <h1 class="section-title">IV. Prompt Engineering</h1>
+
+  <div style="text-align:center;margin:12px 0 24px;">
+    <a href="https://informaticienC69.github.io/transpobot1/flux_ia_transpobot.html" target="_blank" class="doc-link">🧠 Consulter le diagramme du Flux IA (Text-to-SQL) &rarr;</a>
+  </div>
+
+  <p>Le <strong>Prompt Engineering</strong> est le cœur décisionnel de l'application quant à l'assistance intelligente. Pour éviter les hallucinations du modèle et garantir la sécurité du système d'information, la génération a été scindée en <strong>deux appels LLM distincts</strong> (LLaMA-3.3-70b).</p>
+
+  <h2 class="subsection-title" id="chap4-1">IV.1 Appel #1 : Génération SQL sécurisée (Temperature = 0.0)</h2>
+  <p>L'objectif exclusif de ce premier appel est de générer une requête SQL valide ou de rejeter formellement la demande de l'utilisateur si elle implique une mutation des données.</p>
+  <ul>
+    <li style="margin-bottom:8px"><strong>Injection du DDL Complet</strong> : Le prompt intègre la définition absolue des 13 tables (clés étrangères, énumérations, et cas problématiques), coupant court à toute pure invention d'attribut de la part du modèle.</li>
+    <li style="margin-bottom:8px"><strong>Règles de sécurité de type "Kill Switch"</strong> : Seules les sélections (<code>SELECT</code>) sont autorisées. Toute intention de modification de données (ex. "Supprime cette ligne") ordonne au LLM de retourner la chaîne clé <code>NON_SQL</code>, ce qui interrompt immédiatement le pipeline logiciel.</li>
+    <li><strong>Prompting Few-Shot</strong> : 6 exemples typiques modélisant les requêtes temporelles ou complexes (jointures, calculs) orientent fermement le modèle vers des patterns validés.</li>
+  </ul>
+
+  <h2 class="subsection-title" id="chap4-2">IV.2 Appel #2 : Synthèse narrative (Temperature = 0.4)</h2>
+  <p>Immédiatement après le retour des résultats tabulaires JSON par MySQL, un second processus LLM produit la voix du chatbot.</p>
+  <ul>
+    <li style="margin-bottom:8px"><strong>Rôle d'Analyste Métier</strong> : Le prompt impose à l'IA d'effacer tous les détails techniques (acronymes de la BDD, formats JSON bruts) pour s'adresser au profil administratif/manager.</li>
+    <li><strong>Adaptation Bilingue Contextuelle</strong> : La production de la synthèse ajuste automatiquement sa syntaxe dans la langue organique sollicitée par l'expression même du gestionnaire.</li>
+  </ul>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE V — RÉSULTATS ET REQUÊTES
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap5">
+  <h1 class="section-title">V. Exemples de requêtes SQL générées</h1>
+  
+  <p>Pour des raisons de sécurité métier et d'ergonomie, <strong>les requêtes SQL brutes générées par l'intelligence artificielle ne sont pas visibles par le gestionnaire</strong>. L'utilisateur administratif n'interagit qu'en langage naturel et ne reçoit que les résultats.</p>
+  
+  <p>Cependant, le contrôle des commandes SQL produites via le LLM est strictement réservé au portail <strong>SuperAdmin</strong> via la console globale d'audit.</p>
+
+  <h2 class="subsection-title">Trace architecturale et supervision (SuperAdmin)</h2>
+  <p>Le journal dédié <strong>"Logs IA"</strong> du panneau SuperAdmin consigne l'intégralité du trafic cognitif : l'utilisateur, la question d'origine, le temps de réponse du modèle LLaMA, et la requête SQL exacte générée. Si la sécurité a prévalu sur une intention malveillante (Update/Delete), la mention <code>NON_SQL</code> est logguée.</p>
+  
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/superadmin_logs.png" alt="Logs IA Superadmin" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
+  </div>
+  <p class="figure-caption">Figure 6 — Vue SuperAdmin : Journalisation absolue des requêtes IA pour le contrôle qualité et la sécurité</p>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE VI — DÉPLOIEMENT ET SÉCURISATION
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap6">
+  <h1 class="section-title">VI. Déploiement et Mise en Production</h1>
+  
+  <p>Le système TranspoBot a été déployé dans une véritable infrastructure Cloud adaptée aux contraintes réelles de production. Cette approche a nécessité de coordonner trois plateformes majeures : <strong>GitHub</strong>, <strong>Render</strong> et <strong>AlwaysData</strong>.</p>
+
+  <div class="callout" style="font-family:monospace; font-size:12px; background-color:#1e1e1e; color:#4ade80; border-left:4px solid #3b82f6; overflow-x: auto; white-space: pre; line-height: 1.3; margin-top: 15px;">
+ [DÉVELOPPEUR]
+       │
+       │ 1. Code source (git push)
+       ▼
+ +-------------------+             +---------------------------------------+
+ |      GITHUB       | 2. Webhook  |           SERVEUR RENDER              |
+ |  (transpobot1)    | ──────────► | 🌐 transpobot-api.onrender.com        |
+ +-------------------+             | ⚙️ Backend FastAPI + SPA Frontend     |
+                                   +---------------------------------------+
+                                        │                           │
+                 3. SQL (TCP chiffré)   │                           │ 4. Prompts (HTTPS)
+                 DB_PASSWORD sécurisé   │                           │ GROQ_API_KEY
+                                        ▼                           ▼
+                           +------------------------+    +-----------------------+
+                           |       ALWAYSDATA       |    |       GROQ API        |
+                           | 🗄️ SGBD MySQL 8.0       |    | 🧠 LLaMA-3.3-70b      |
+                           +------------------------+    +-----------------------+
+  </div>
+  <p class="figure-caption">Figure 7 — Squelette simplifié de l'architecture CI/CD du déploiement</p>
+
+  <h2 class="subsection-title">VI.1 Intégration Continue (CI/CD) et Infrastructure as Code</h2>
+  <p>Le projet adopte le principe de l'<em>Infrastructure as Code</em> avec le fichier <code>render.yaml</code>, situé à la racine du dépôt. Celui-ci indique à Render l'environnement d'exécution exact à provisionner. Voici l'extrait fondamental qui automatise le déploiement à froid :</p>
+
+  <div class="callout" style="font-family:monospace; font-size:12px; background-color:#1e1e1e; color:#d4d4d4; border-left:4px solid #e24329; overflow-x: auto; white-space: pre; margin-bottom: 12px;">services:
+  - type: web
+    name: transpobot-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT</div>
+
+  <ul>
+    <li>Le backend <strong>FastAPI</strong> sert non seulement les requêtes API (<code>/api/*</code>), mais utilise également le module <code>StaticFiles</code> pour servir nativement le code HTML/CSS/JS du <strong>frontend</strong>. Cette manœuvre technique fusionne le client et le serveur sous la même origine web (<code>https://transpobot-api.onrender.com</code>).</li>
+    <li>À chaque <code>git push main</code> sur le référentiel GitHub, un hook web prévient <strong>Render</strong> qui déclenche automatiquement le <em>build</em> et redéploie le système de manière transparente (CI/CD).</li>
+  </ul>
+
+  <h2 class="subsection-title">VI.2 Initialisation de la Base de Données & Sécurisation absolue</h2>
+  <p>La persistance des données est isolée sur un serveur <strong>AlwaysData</strong> hébergeant une base MySQL 8. L'architecture a été amorcée via l'importation directe de notre fichier souche robuste <code>init_alwaysdata.sql</code> dans le client phpMyAdmin de production. Cela a garanti la création des 13 tables relationnelles de manière idempotente ainsi que l'ancrage des triggers métiers (calcul des recettes automatiques).</p>
+
+  <p><strong>Sécurité des variables et secrets :</strong> Dans un registre de sécurité professionnelle, aucune donnée sensible n'est écrite en clair. Le fichier de configuration <code>.env</code> est neutralisé par Git. Cependant, l'application dépend de composants externes vitaux, dont on injecte les clés directement à chaud sur Render :</p>
+  
+  <ul style="font-family:monospace; font-size:13px; line-height:1.6; margin-bottom:15px; background: #f8f9fa; padding: 12px 35px; border-radius: 6px; border: 1px solid #e0e0e0;">
+    <li><strong style="color:#d32f2f">DB_HOST / DB_USER / DB_PASSWORD</strong> : Connexion chiffrée (TCP) à AlwaysData</li>
+    <li><strong style="color:#d32f2f">JWT_SECRET</strong> : La signature cryptographique protégeant les jetons de connexion</li>
+    <li><strong style="color:#d32f2f">GROQ_API_KEY</strong> : Liaison API sécurisée au modèle d'Intelligence Artificielle LLaMA-3</li>
+    <li><strong style="color:#d32f2f">BREVO_API_KEY</strong> : Relais pour les services d'envoi de mails transactionnels</li>
+  </ul>
+
+  <div style="text-align:center; margin: 15px 0;">
+    <img src="images/render_env.png" alt="Variables d'environnement sur Render" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
+  </div>
+  <p class="figure-caption">Figure 8 — Render : Tableau de bord de l'injection en direct et sécurisée des informations d'identification</p>
+
+  <h2 class="subsection-title">VI.3 Stratégie de Maintien "Keep-Alive" (CRON)</h2>
+  <p>Les serveurs académiques (gratuits) de Render imposent le "spin-down" : le conteneur s'éteint totalement au bout de 15 minutes d'inactivité. Relancer TranspoBot infligeait jusqu'à 50 secondes d'attente lors du "Cold Start" (démarrage à froid), ruinant l'expérience utilisateur.</p>
+  
+  <p>La solution a été d'utiliser l'interface de programmation des <strong>Tâches Planifiées</strong> d'AlwaysData. Un script s'exécute automatiquement en tâche de fond toutes les <strong>11 minutes</strong> sur leurs serveurs d'administration :</p>
+  
+  <div class="callout" style="font-family:monospace; font-size:13px; background-color:#1e1e1e; color:#00ff00; border-left:4px solid #1976D2; overflow-x: auto; white-space: nowrap;">
+    curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" https://transpobot-api.onrender.com
+  </div>
+  
+  <p>Cet appel artificiel, se faisant passer pour un navigateur classique via le <em>User-Agent</em>, valide le trafic auprès de Render, simulant qu'un agent utilise constamment TranspoBot. La latence de l'API est donc perpétuellement abaissée à <strong>0 seconde</strong> de refroidissement (disponibilité 24/7).</p>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE VII — TESTS
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap7">
+  <h1 class="section-title">VII. Validation et Scénarios de Test</h1>
+  
+  <p>Afin de garantir la fiabilité du système en production (Zero Downtime) et l'intégrité de la logique métier, plusieurs campagnes de tests ont été menées couvrant l'interface graphique (frontend), les routes d'API, et la sécurité des accès.</p>
+
+  <h2 class="subsection-title">VII.1 Tests Fonctionnels (CRUD & Métier)</h2>
+  <p>Nous avons validé de bout en bout le processus métier principal : l'ajout d'une nouvelle entité (véhicule ou trajet) et sa répercussion immédiate sur les indicateurs de performance (KPI) du tableau de bord.</p>
+  
+  <div class="figure-placeholder" style="min-height:50px;">📸 [EN ATTENTE : Capture 1 - Création réussie]</div>
+  <p class="figure-caption">Figure 9 — Test de bout en bout : Notification de succès lors d'une opération d'écriture en BDD</p>
+
+  <div class="figure-placeholder" style="min-height:50px;">📸 [EN ATTENTE : Capture 2 - Mise à jour KPI Dashboard]</div>
+  <p class="figure-caption">Figure 10 — Test d'intégration : Actualisation instantanée des KPI de gestion après l'opération</p>
+
+  <h2 class="subsection-title">VII.2 Tests de Robustesse & Cybersécurité</h2>
+  <p>Les vulnérabilités classiques (Brute Force, Cross-Site Scripting, accès hors privilèges) ont fait l'objet de tests red-team. Nous illustrons ici le bouclier anti-Brute Force bloquant un attaquant tentant de forcer l'accès d'un compte agent.</p>
+
+  <div class="figure-placeholder" style="min-height:50px;">📸 [EN ATTENTE : Capture 3 - Blocage Brute Force]</div>
+  <p class="figure-caption">Figure 11 — Test de robustesse : Déclenchement de la sécurité bloquant le compte après N tentatives</p>
+</div>
+
+<!-- ════════════════════════════════════════
+  CHAPITRE VIII — CONCLUSION
+════════════════════════════════════════ -->
+<div class="page page-break" id="chap8">
+  <h1 class="section-title">VIII. Conclusion Générale et Perspectives</h1>
+
+  <p>Le projet <strong>TranspoBot</strong> a atteint et dépassé l'ensemble des objectifs fixés par le cahier des charges. En partant d'un besoin réel du secteur du transport urbain — l'exploitation accessible de données opérationnelles complexes — nous avons conçu et livré une application web complète, déployée en production et opérationnelle.</p>
+
+  <h2 class="subsection-title">Bilan des réalisations</h2>
+  <p>Sur le plan technique, le projet a permis de maîtriser et d'intégrer un ensemble cohérent de technologies de pointe :</p>
+  <ul>
+    <li><strong>Modélisation relationnelle rigoureuse</strong> : 13 tables MySQL, 10 associations Merise, 2 triggers automatiques pour le calcul des recettes, et un script d'initialisation idempotent (<code>init_alwaysdata.sql</code>) ;</li>
+    <li><strong>Backend REST sécurisé</strong> : API FastAPI avec validation Pydantic, machine à états métier stricte pour les trajets, règles anti-double-booking, protection brute-force JWT et journal d'audit complet ;</li>
+    <li><strong>Interface utilisateur moderne</strong> : Dashboard SPA responsive avec graphiques temps réel (Charts.js), portail SuperAdmin à 5 onglets, et flux d'invitation par email ;</li>
+    <li><strong>Intégration IA opérationnelle</strong> : Pipeline Text-to-SQL en deux appels LLM (LLaMA-3.3-70b via Groq), réponse bilingue, sécurité SELECT-only, journalisation des requêtes IA ;</li>
+    <li><strong>Déploiement Cloud professionnel</strong> : CI/CD automatique GitHub → Render, base MySQL sur AlwaysData, stratégie Keep-Alive, gestion des secrets via variables d'environnement.</li>
+  </ul>
+
+  <h2 class="subsection-title">Valeur ajoutée et enseignements</h2>
+  <p>Ce projet illustre concrètement comment l'Intelligence Artificielle — et plus précisément le paradigme <strong>Text-to-SQL</strong> — peut démocratiser l'accès à l'analyse de données pour des utilisateurs non techniciens. Plutôt que de former les gestionnaires au SQL, TranspoBot leur permet de poser leurs questions en français ou en anglais et d'obtenir instantanément des réponses analytiques précises.</p>
+
+  <p>L'expérience a également mis en évidence l'importance critique du <strong>Prompt Engineering</strong> : la qualité du schéma injecté dans le contexte LLM et la précision des règles métier définies dans le prompt système sont le facteur déterminant de la fiabilité des requêtes générées. Une ambiguïté dans le schéma se traduit directement par des hallucinations de colonnes inexistantes.</p>
+
+  <h2 class="subsection-title">Perspectives d'évolution</h2>
+  <p>Plusieurs axes d'amélioration ont été identifiés pour de futures versions du système :</p>
+  <ul>
+    <li><strong>Mémoire conversationnelle</strong> : Implémenter un historique de contexte sur plusieurs tours pour permettre des questions de suivi (« et pour la semaine dernière ? ») ;</li>
+    <li><strong>Application mobile</strong> : Développer une application React Native permettant aux chauffeurs de gérer leur statut et de signaler des incidents depuis le terrain ;</li>
+    <li><strong>Géolocalisation temps réel</strong> : Intégrer un flux WebSocket pour afficher la position des véhicules en cours de trajet sur une carte interactive (Leaflet.js) ;</li>
+    <li><strong>Analyse prédictive</strong> : Exploiter l'historique des incidents et des kilométrages pour prédire les besoins de maintenance préventive par apprentissage automatique ;</li>
+    <li><strong>Fine-tuning du modèle</strong> : Entraîner un modèle spécialisé sur les requêtes SQL métier TranspoBot pour réduire la latence et améliorer la précision sur les cas complexes.</li>
+  </ul>
+
+  <div class="callout green" style="margin-top:20px">
+    <strong>Lien production :</strong> L'application TranspoBot est accessible en ligne à l'adresse
+    <a href="https://transpobot-api.onrender.com" target="_blank" style="color:#1565C0;font-weight:600;">https://transpobot-api.onrender.com</a>
+    — Code source disponible sur <a href="https://github.com/informaticienC69/transpobot1" target="_blank" style="color:#1565C0;font-weight:600;">GitHub : informaticienC69/transpobot1</a>
+  </div>
+</div>
+
+</body>
+</html>

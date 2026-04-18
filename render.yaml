@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: transpobot-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: SUPERADMIN_USERNAME
+        sync: false
+      - key: SUPERADMIN_PASSWORD
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: APP_URL
+        value: https://transpobot-api.onrender.com
+      - key: FRONTEND_ORIGIN
+        value: https://transpobot-api.onrender.com

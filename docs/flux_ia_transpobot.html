@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flux IA Text-to-SQL — TranspoBot</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    font-family: 'Inter', sans-serif; 
+    background: #f8fafc; 
+    color: #1e293b; 
+    height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 1.5rem;
+    overflow: hidden; 
+  }
+  
+  header { text-align: center; margin-bottom: 1rem; }
+  h1 { font-size: 1.4rem; color: #0f172a; font-weight: 700; margin-bottom: 0.2rem; }
+  p.subtitle { color: #64748b; font-size: 0.85rem; }
+
+  .layout { display: flex; gap: 1.5rem; flex: 1; min-height: 0; }
+  .panel {
+    background: white; border-radius: 12px; border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 1.5rem; display: flex; flex-direction: column;
+  }
+  .panel-left { flex: 6; }
+  .panel-right { flex: 4; overflow-y: auto; padding-right: 0.5rem; }
+
+  h2 {
+    font-size: 1.05rem; color: #1e293b; border-bottom: 2px solid #3b82f6;
+    padding-bottom: 0.4rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  /* SVG DIAGRAMME */
+  .svg-container { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; }
+  svg { width: 100%; height: 100%; max-height: 480px; }
+  
+  .node { fill: #ffffff; stroke-width: 2.5; rx: 8; stroke: #334155; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+  .node.ia { stroke: #8b5cf6; fill: #faf5ff; }
+  .node.db { stroke: #10b981; fill: #f0fdf4; }
+  .node.api { stroke: #3b82f6; fill: #eff6ff; }
+  .node.user { stroke: #f59e0b; fill: #fffbeb; }
+
+  .n-title { font-size: 13px; font-weight: 700; fill: #0f172a; font-family: 'Inter', sans-serif; text-anchor: middle; }
+  .n-sub { font-size: 10px; font-weight: 500; fill: #64748b; font-family: 'Inter', sans-serif; text-anchor: middle; }
+  
+  .edge { stroke: #94a3b8; stroke-width: 2; fill: none; }
+  .arrow-head { fill: #94a3b8; }
+  
+  .e-bg { fill: white; rx: 4; stroke: #e2e8f0; stroke-width: 1; }
+  .e-txt { font-size: 10px; font-weight: 700; fill: #2563eb; font-family: 'Inter', sans-serif; text-anchor: middle; }
+  .e-badge { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; fill: white; text-anchor: middle; }
+
+  /* STEPS LIST */
+  .step-item { display: flex; margin-bottom: 1.2rem; }
+  .step-item:last-child { margin-bottom: 0; }
+  .step-num { width: 28px; height: 28px; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; margin-right: 1rem; margin-top: 2px; }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 700; font-size: 0.95rem; color: #0f172a; margin-bottom: 0.2rem; }
+  .step-desc { font-size: 0.82rem; color: #475569; line-height: 1.4; text-align: justify; }
+  code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-size: 0.75rem; color: #b45309; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Flux Opérationnel IA (Text-to-SQL)</h1>
+  <p class="subtitle">Squelette du cheminement des requêtes en Langage Naturel</p>
+</header>
+
+<div class="layout">
+  
+  <!-- PANNEAU GAUCHE : SQUELETTE SVG -->
+  <div class="panel panel-left">
+    <h2>Schéma Logique : De la Question au Graphique</h2>
+    
+    <div class="svg-container">
+      <svg viewBox="0 0 600 320" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head" />
+          </marker>
+        </defs>
+
+        <!-- NOEUDS (NODES) -->
+        <!-- User -->
+        <rect x="130" y="20" width="140" height="40" class="node user" />
+        <text x="200" y="44" class="n-title">Dashboard Web</text>
+
+        <!-- API Backend -->
+        <rect x="130" y="140" width="140" height="50" class="node api" />
+        <text x="200" y="161" class="n-title">API FastAPI</text>
+        <text x="200" y="177" class="n-sub">Orchestrateur Python</text>
+
+        <!-- MySQL -->
+        <rect x="130" y="260" width="140" height="50" class="node db" />
+        <text x="200" y="281" class="n-title">MySQL 8.0</text>
+        <text x="200" y="297" class="n-sub">Exécution SQL</text>
+
+        <rect x="430" y="140" width="140" height="50" class="node ia" />
+        <text x="500" y="161" class="n-title">API Groq</text>
+        <text x="500" y="177" class="n-sub">LLaMA-3.3-70b-versatile</text>
+
+        <!-- FLECHES ET TEXTES ASSOCIES -->
+        
+        <!-- 1. Frontend to Backend -->
+        <line x1="170" y1="65" x2="170" y2="135" class="edge" marker-end="url(#arrow)" />
+        <rect x="105" y="86" width="115" height="18" class="e-bg" />
+        <circle cx="112" cy="95" r="7" fill="#3b82f6" /><text x="112" y="99" class="e-badge">1</text>
+        <text x="168" y="99" class="e-txt" style="fill:#b45309">"Retards d'hier ?"</text>
+
+        <!-- 2. Backend to OpenAI -->
+        <line x1="275" y1="150" x2="425" y2="150" class="edge" marker-end="url(#arrow)" />
+        <rect x="290" y="138" width="120" height="18" class="e-bg" />
+        <circle cx="297" cy="147" r="7" fill="#3b82f6" /><text x="297" y="151" class="e-badge">2</text>
+        <text x="358" y="151" class="e-txt" style="fill:#8b5cf6">Prompt + Schéma BDD</text>
+
+        <!-- 3. OpenAI to Backend -->
+        <line x1="425" y1="175" x2="275" y2="175" class="edge" marker-end="url(#arrow)" />
+        <rect x="290" y="163" width="120" height="18" class="e-bg" />
+        <circle cx="403" cy="172" r="7" fill="#3b82f6" /><text x="403" y="176" class="e-badge">3</text>
+        <text x="342" y="176" class="e-txt" style="fill:#3b82f6">Code SQL (SELECT...)</text>
+
+        <!-- 4. Backend to MySQL -->
+        <line x1="170" y1="195" x2="170" y2="255" class="edge" marker-end="url(#arrow)" />
+        <rect x="85" y="210" width="105" height="18" class="e-bg" />
+        <circle cx="92" cy="219" r="7" fill="#3b82f6" /><text x="92" y="223" class="e-badge">4</text>
+        <text x="142" y="223" class="e-txt" style="fill:#10b981">Exécution requête</text>
+
+        <!-- 5. MySQL to Backend -->
+        <line x1="230" y1="255" x2="230" y2="195" class="edge" marker-end="url(#arrow)" />
+        <rect x="210" y="210" width="95" height="18" class="e-bg" />
+        <circle cx="298" cy="219" r="7" fill="#3b82f6" /><text x="298" y="223" class="e-badge">5</text>
+        <text x="250" y="223" class="e-txt" style="fill:#64748b">Données JSON</text>
+
+        <!-- 6. Backend to Frontend -->
+        <line x1="230" y1="135" x2="230" y2="65" class="edge" marker-end="url(#arrow)" />
+        <rect x="210" y="86" width="115" height="18" class="e-bg" />
+        <circle cx="318" cy="95" r="7" fill="#3b82f6" /><text x="318" y="99" class="e-badge">6</text>
+        <text x="260" y="99" class="e-txt" style="fill:#0f172a">Réponse + Tableau</text>
+
+      </svg>
+    </div>
+  </div>
+
+  <!-- PANNEAU DROIT : EXPLICATION DU FLUX -->
+  <div class="panel panel-right">
+    <h2>Les 6 Étapes du Pipeline</h2>
+    
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Langage Naturel (NLP)</div>
+        <div class="step-desc">Depuis le Dashboard, le gestionnaire tape sa question en français (ex: <em>"Affiche moi les retards des bus hier"</em>). La requête HTTP est envoyée à l'API FastAPI.</div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Construction du Prompt</div>
+        <div class="step-desc">L'API Python crée un contexte strict. Elle envoie à OpenAI la question de l'utilisateur ET notre <strong>Dictionnaire de données (Schéma MLD)</strong> en instruction système pour guider l'IA.</div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Génération SQL (LLM — temp. 0.0)</div>
+        <div class="step-desc"><strong>LLaMA-3.3-70b</strong> (Groq) analyse le schéma MLD injecté et retourne uniquement une syntaxe propre : <code>SELECT * FROM trajets WHERE retard_minutes &gt; 0 ...</code>. Température 0.0 pour garantir un résultat déterministe sans hallucination. L'API vérifie que la requête commence par SELECT (blocage sécurité).</div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Exécution Sécurisée</div>
+        <div class="step-desc">L'API FastAPI se connecte à **MySQL** et exécute la requête générée en mode <em>Lecture Seule (Read-Only)</em> pour bloquer formellement toute tentative de DELETE ou d'injection SQL.</div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">Récupération Structurée</div>
+        <div class="step-desc">La base de données MySQL répond en retournant les lignes exactes demandées (Array JSON brut contenant les matricules, horaires, infos des chauffeurs).</div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <div class="step-title">2ème Appel LLM — Réponse en Langage Naturel</div>
+        <div class="step-desc">Un 2ème appel à <strong>LLaMA-3.3-70b</strong> (temp. 0.4) génère une réponse fluide en français (ou anglais). L'IA reçoit le JSON brut des résultats et le schéma BDD et produit un compte-rendu analytique naturel comme un vrai analyste.</div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <div class="step-title">Affichage — Réponse + Tableau Analytique</div>
+        <div class="step-desc">Le Frontend reçoit la réponse narrative + les données JSON brutes. L'interface affiche le texte et génère dynamiquement un tableau analytique cliquable sous l'écran de chat. Chaque requête est loguée dans <code>logs_requetes</code> avec l'email du gestionnaire et le temps de réponse en ms.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

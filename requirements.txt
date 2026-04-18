@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+mysql-connector-python
+pydantic[email]
+python-dotenv
+groq
+bcrypt
+PyJWT
+email-validator>=2.0.0

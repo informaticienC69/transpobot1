@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCD — TranspoBot | ESP/UCAD DIC1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f4f8;
+      color: #1a202c
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      color: white;
+      padding: 1.4rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .3)
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: .75rem;
+      margin-top: 4px
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .2);
+      padding: .5rem 1.2rem;
+      border-radius: 8px;
+      text-align: center;
+      font-size: .75rem
+    }
+
+    .badge strong {
+      display: block;
+      font-size: 1rem
+    }
+
+    main {
+      padding: 1.5rem 2rem;
+      max-width: 1520px;
+      margin: 0 auto
+    }
+
+    .note {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: .9rem 1.2rem;
+      margin-bottom: 1.2rem;
+      font-size: .75rem;
+      color: #92400e;
+      line-height: 1.7
+    }
+
+    .stitle {
+      font-size: .9rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem
+    }
+
+    .pill {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: .65rem;
+      font-weight: 600
+    }
+
+    .dc {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .08);
+      overflow-x: auto;
+      margin-bottom: 1.5rem
+    }
+
+    .cv {
+      position: relative;
+      width: 1450px;
+      height: 940px
+    }
+
+    /* Entity */
+    .e {
+      position: absolute;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 14px rgba(0, 0, 0, .13);
+      border: 1px solid rgba(0, 0, 0, .07);
+      font-size: 10px;
+      font-family: 'Inter', sans-serif
+    }
+
+    .eh {
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .7px;
+      text-transform: uppercase
+    }
+
+    .eb {
+      background: #fff
+    }
+
+    .er {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 11px;
+      gap: 8px;
+      border-top: 1px solid #f0f4f8
+    }
+
+    .er:nth-child(even) {
+      background: #f9fafb
+    }
+
+    .an {
+      color: #374151;
+      font-size: 10px
+    }
+
+    .an.id {
+      text-decoration: underline;
+      font-weight: 700;
+      color: #111827
+    }
+
+    .at {
+      color: #9ca3af;
+      font-size: 9px;
+      white-space: nowrap
+    }
+
+    .new {
+      background: #fefce8 !important
+    }
+
+    .an.new {
+      color: #854d0e
+    }
+
+    /* SVG overlay — drawn LAST so it's on top of entity divs for labels in gaps */
+    .sv {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10
+    }
+
+    /* Legend & readings */
+    .leg-wrap {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem
+    }
+
+    .li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .72rem;
+      color: #6b7280
+    }
+
+    .ld {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px
+    }
+
+    .ls {
+      width: 1px;
+      height: 22px;
+      background: #e5e7eb
+    }
+
+    .rd {
+      background: white;
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .06)
+    }
+
+    .rd h3 {
+      font-size: .85rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 1rem
+    }
+
+    .rd table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .75rem
+    }
+
+    .rd th {
+      background: #f9fafb;
+      padding: .5rem 1rem;
+      text-align: left;
+      border-bottom: 2px solid #e5e7eb;
+      font-weight: 600;
+      color: #374151
+    }
+
+    .rd td {
+      padding: .5rem 1rem;
+      border-bottom: 1px solid #f0f4f8;
+      color: #4b5563;
+      vertical-align: top
+    }
+
+    .rd tr:last-child td {
+      border-bottom: none
+    }
+
+    .rd tr:hover td {
+      background: #fafafa
+    }
+
+    .as {
+      font-weight: 700;
+      color: #1e40af
+    }
+
+    .ca {
+      font-family: monospace;
+      color: #b91c1c;
+      font-weight: 700;
+      font-size: .8rem
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>🗄️ MCD — TranspoBot</h1>
+      <p>Modèle Conceptuel de Données · Notation Merise · ESP/UCAD — DIC1 Génie Informatique</p>
+    </div>
+    <div class="badge"><strong>12 Entités · 10 Associations</strong>Notation Merise — Identifiants soulignés</div>
+  </header>
+
+  <main>
+    <div class="note">
+      ⚠️ <strong>Rappel Merise :</strong> Le MCD représente le niveau <em>conceptuel</em> — pas de clés étrangères.
+      L'<u>identifiant</u> est souligné. <strong>UTILISATEUR</strong> et <strong>LOGS_REQUETES</strong> sont des entités
+      système (couche auth/IA), sans association avec le modèle métier transport.
+      Cardinalités : <strong>0,1</strong> = zéro ou un · <strong>1,1</strong> = exactement un · <strong>0,N</strong> =
+      zéro ou plusieurs · <strong>1,N</strong> = un ou plusieurs.
+      Attributs <span
+        style="background:#fefce8;border:1px solid #fcd34d;padding:0 5px;border-radius:3px;color:#854d0e;font-size:.8em">★</span>
+      = enrichissements pour optimiser les requêtes IA (Text-to-SQL).
+    </div>
+
+    <div class="stitle">📐 Diagramme MCD <span class="pill">Merise</span></div>
+
+    <div class="dc">
+      <div class="cv">
+
+        <!-- ═══ SVG (z-index:10 = AU-DESSUS des divs, labels toujours visibles) ═══ -->
+        <svg class="sv" width="1450" height="940">
+          <defs>
+            <style>
+              .rl {
+                stroke: #6b7280;
+                stroke-width: 2;
+                fill: none
+              }
+
+              .lb {
+                font-family: 'Inter', sans-serif;
+                font-size: 10.5px;
+                fill: #1e3a8a;
+                font-weight: 700
+              }
+
+              .cd {
+                font-family: 'Inter', sans-serif;
+                font-size: 9px;
+                fill: #b91c1c;
+                font-weight: 700
+              }
+            </style>
+          </defs>
+
+          <!-- ① conduit  VÉHICULE(0,N)—(0,1)CHAUFFEUR  -->
+          <!-- VÉHICULE right=245, CHAUFFEUR left=360, gap 115px -->
+          <line class="rl" x1="245" y1="405" x2="360" y2="360" />
+          <rect x="268" y="374" width="52" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="271" y="386">conduit</text>
+          <rect x="248" y="393" width="26" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="251" y="403">0,N</text>
+          <rect x="329" y="348" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="331" y="358">0,1</text>
+
+          <!-- ② utilise  VÉHICULE(0,N)—(1,1)TRAJET  -->
+          <!-- VÉHICULE right=245, TRAJET left=680, gap 435px -->
+          <path class="rl" d="M245,490 C430,490 490,540 680,540" />
+          <rect x="400" y="476" width="46" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="403" y="488">utilise</text>
+          <rect x="248" y="490" width="26" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="251" y="500">0,N</text>
+          <rect x="652" y="528" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="655" y="538">1,1</text>
+
+          <!-- ③ subit  VÉHICULE(0,N)—(1,1)MAINTENANCE  -->
+          <!-- VÉHICULE bottom=636, MAINTENANCE top=690, gap 54px -->
+          <line class="rl" x1="137" y1="636" x2="137" y2="690" />
+          <rect x="142" y="655" width="36" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="145" y="667">subit</text>
+          <rect x="110" y="639" width="26" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="113" y="649">0,N</text>
+          <rect x="110" y="674" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="112" y="684">1,1</text>
+
+          <!-- ④ effectue  CHAUFFEUR(0,N)—(1,1)TRAJET  -->
+          <!-- CHAUFFEUR bottom=501, TRAJET top=440 -->
+          <path class="rl" d="M450,501 C450,565 787,525 787,440" />
+          <rect x="592" y="515" width="57" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="595" y="527">effectue</text>
+          <rect x="423" y="504" width="26" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="426" y="514">0,N</text>
+          <rect x="760" y="426" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="762" y="436">1,1</text>
+
+          <!-- ⑤ planifie  TRAJET(1,1)—(1,N)LIGNE  -->
+          <!-- TRAJET right=895, LIGNE left=990, gap 95px -->
+          <path class="rl" d="M895,520 C945,520 945,333 990,333" />
+          <rect x="917" y="410" width="52" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="920" y="422">planifie</text>
+          <rect x="898" y="513" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="901" y="523">1,1</text>
+          <rect x="963" y="320" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="966" y="330">1,N</text>
+
+          <!-- ⑥ applique  LIGNE(1,N)—(1,1)TARIF  -->
+          <!-- LIGNE right=1190, TARIF left=1230, gap 40px -->
+          <line class="rl" x1="1190" y1="290" x2="1230" y2="270" />
+          <rect x="1193" y="265" width="55" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="1196" y="277">applique</text>
+          <rect x="1193" y="283" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1196" y="293">1,N</text>
+          <rect x="1204" y="252" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1207" y="262">1,1</text>
+
+          <!-- ⑦ passe_par  LIGNE(1,N)—(0,N)ARRET  (+ordre +temps_estime) -->
+          <!-- LIGNE right=1190 y=370 → L-path → ARRET top=450 cx=1322 -->
+          <path class="rl" d="M1190,370 L1215,370 L1215,440 L1322,440 L1322,450" />
+          <rect x="1218" y="354" width="67" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="1221" y="366">passe_par</text>
+          <rect x="1218" y="372" width="36" height="14" rx="3" fill="#f0fdf4" stroke="#86efac" stroke-width="1" />
+          <text style="font-family:'Inter',sans-serif;font-size:9px;fill:#166534;font-weight:600" x="1221"
+            y="383">ordre</text>
+          <rect x="1258" y="372" width="92" height="14" rx="3" fill="#f0fdf4" stroke="#86efac" stroke-width="1" />
+          <text style="font-family:'Inter',sans-serif;font-size:9px;fill:#166534;font-weight:600" x="1261"
+            y="383">temps_estime (min)</text>
+          <rect x="1193" y="358" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1196" y="368">1,N</text>
+          <rect x="1296" y="436" width="26" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1299" y="446">0,N</text>
+
+          <!-- ⑧ génère  TRAJET(0,N)—(1,1)INCIDENT  -->
+          <!-- TRAJET bottom=651, INCIDENT top=710, gap 59px -->
+          <line class="rl" x1="787" y1="651" x2="787" y2="710" />
+          <rect x="793" y="672" width="47" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="796" y="684">génère</text>
+          <rect x="760" y="654" width="26" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="763" y="664">0,N</text>
+          <rect x="762" y="695" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="765" y="705">1,1</text>
+
+          <!-- ⑨ définit  LIGNE(1,N)—(1,1)HORAIRE  -->
+          <!-- LIGNE bottom=426, HORAIRE top=470, gap 44px, both at left=990 -->
+          <line class="rl" x1="1050" y1="426" x2="1050" y2="470" />
+          <rect x="1055" y="441" width="44" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="1058" y="453">définit</text>
+          <rect x="1022" y="429" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1025" y="439">1,N</text>
+          <rect x="1022" y="455" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1025" y="465">1,1</text>
+
+          <!-- ⑩ génère  UTILISATEUR(1,1)—(0,N)LOGS_REQUETES  -->
+          <!-- LOGS right=1195, UTILISATEUR left=1230, gap 35px -->
+          <line class="rl" x1="1195" y1="110" x2="1230" y2="110" />
+          <rect x="1197" y="94" width="54" height="16" rx="3" fill="white" stroke="#c7d2fe" stroke-width="1" />
+          <text class="lb" x="1200" y="106">génère</text>
+          <rect x="1197" y="100" width="26" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1200" y="110">0,N</text>
+          <rect x="1202" y="115" width="22" height="13" rx="2" fill="#fff1f2" stroke="#fca5a5" stroke-width="1" />
+          <text class="cd" x="1204" y="125">1,1</text>
+
+        </svg>
+
+        <!-- ═══ ENTITÉS ═══ -->
+
+        <!-- LOGS_REQUETES  left=980 top=30 w=215 -->
+        <div class="e" style="left:980px;top:30px;width:215px">
+          <div class="eh" style="background:#3B6D11">LOGS_REQUETES</div>
+          <div class="eb">
+            <div class="er"><span class="an id">id_log</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">question</span><span class="at">TEXT</span></div>
+            <div class="er"><span class="an">sql_genere</span><span class="at">TEXT</span></div>
+            <div class="er"><span class="an">temps_reponse_ms</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">date_requete</span><span class="at">DATETIME</span></div>
+          </div>
+        </div>
+
+        <div class="e" style="left:1230px;top:30px;width:200px">
+          <div class="eh" style="background:#3B6D11">UTILISATEUR</div>
+          <div class="eb">
+            <div class="er"><span class="an id">email</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">nom</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">mot_de_passe_hash</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">role</span><span class="at">ENUM</span></div>
+            <div class="er new"><span class="an new">statut ★</span><span class="at">ENUM</span></div>
+            <div class="er new"><span class="an new">token_activation ★</span><span class="at">VARCHAR</span></div>
+            <div class="er new"><span class="an new">token_expiration ★</span><span class="at">DATETIME</span></div>
+            <div class="er"><span class="an">created_at</span><span class="at">DATETIME</span></div>
+          </div>
+        </div>
+
+        <!-- VÉHICULE  left=30 top=350 w=215 -->
+        <div class="e" style="left:30px;top:350px;width:215px">
+          <div class="eh" style="background:#1E5FA5">VÉHICULE</div>
+          <div class="eb">
+            <div class="er"><span class="an id">immatriculation</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">type</span><span class="at">ENUM</span></div>
+            <div class="er"><span class="an">marque</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">modele</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">capacite</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">statut</span><span class="at">ENUM</span></div>
+            <div class="er"><span class="an">kilometrage</span><span class="at">INT</span></div>
+            <div class="er new"><span class="an new">kilometrage_seuil ★</span><span class="at">INT</span></div>
+            <div class="er new"><span class="an new">date_derniere_revision ★</span><span class="at">DATE</span></div>
+            <div class="er"><span class="an">date_acquisition</span><span class="at">DATE</span></div>
+          </div>
+        </div>
+
+        <div class="e" style="left:360px;top:240px;width:215px">
+          <div class="eh" style="background:#0F6E56">CHAUFFEUR</div>
+          <div class="eb">
+            <div class="er"><span class="an id">numero_permis</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">nom</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">prenom</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">email</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">telephone</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">categorie_permis</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">disponibilite</span><span class="at">BOOL</span></div>
+            <div class="er"><span class="an">note_moyenne</span><span class="at">DECIMAL</span></div>
+            <div class="er"><span class="an">date_embauche</span><span class="at">DATE</span></div>
+            <div class="er"><span class="an">created_at</span><span class="at">TIMESTAMP</span></div>
+          </div>
+        </div>
+
+        <div class="e" style="left:680px;top:440px;width:215px">
+          <div class="eh" style="background:#7A4E08">TRAJET</div>
+          <div class="eb">
+            <div class="er"><span class="an id">id_trajet</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">date_heure_depart</span><span class="at">DATETIME</span></div>
+            <div class="er"><span class="an">date_heure_arrivee</span><span class="at">DATETIME</span></div>
+            <div class="er"><span class="an">statut</span><span class="at">ENUM</span></div>
+            <div class="er"><span class="an">nb_passagers</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">recette</span><span class="at">DECIMAL</span></div>
+            <div class="er"><span class="an">retard_minutes</span><span class="at">INT</span></div>
+            <div class="er new"><span class="an new">gestionnaire_email ★</span><span class="at">FK</span></div>
+          </div>
+        </div>
+
+        <!-- LIGNE  left=990 top=240 w=200 -->
+        <div class="e" style="left:990px;top:240px;width:200px">
+          <div class="eh" style="background:#534AB7">LIGNE</div>
+          <div class="eb">
+            <div class="er"><span class="an id">code</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">nom</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">origine</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">destination</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">distance_km</span><span class="at">DECIMAL</span></div>
+            <div class="er"><span class="an">duree_minutes</span><span class="at">INT</span></div>
+          </div>
+        </div>
+
+        <!-- TARIF  left=1230 top=240 w=185 -->
+        <div class="e" style="left:1230px;top:240px;width:185px">
+          <div class="eh" style="background:#534AB7">TARIF</div>
+          <div class="eb">
+            <div class="er"><span class="an id">type_client</span><span class="at">ENUM</span></div>
+            <div class="er"><span class="an">prix</span><span class="at">DECIMAL</span></div>
+          </div>
+        </div>
+
+        <!-- HORAIRE  left=990 top=470 w=215 -->
+        <div class="e" style="left:990px;top:470px;width:215px">
+          <div class="eh" style="background:#534AB7">HORAIRE</div>
+          <div class="eb">
+            <div class="er"><span class="an id">id_horaire</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">heure_depart_theorique</span><span class="at">TIME</span></div>
+            <div class="er"><span class="an">heure_arrivee_theorique</span><span class="at">TIME</span></div>
+            <div class="er"><span class="an">jours_operation</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">frequence_minutes</span><span class="at">INT</span></div>
+          </div>
+        </div>
+
+        <!-- ARRET  left=1230 top=450 w=185 -->
+        <div class="e" style="left:1230px;top:450px;width:185px">
+          <div class="eh" style="background:#534AB7">ARRET</div>
+          <div class="eb">
+            <div class="er"><span class="an id">nom</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">adresse</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">latitude</span><span class="at">DECIMAL</span></div>
+            <div class="er"><span class="an">longitude</span><span class="at">DECIMAL</span></div>
+          </div>
+        </div>
+
+        <div class="e" style="left:680px;top:710px;width:215px">
+          <div class="eh" style="background:#993C1D">INCIDENT</div>
+          <div class="eb">
+            <div class="er"><span class="an id">id_incident</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">type</span><span class="at">ENUM</span></div>
+            <div class="er"><span class="an">description</span><span class="at">TEXT</span></div>
+            <div class="er"><span class="an">gravite</span><span class="at">ENUM</span></div>
+            <div class="er"><span class="an">cout_reparation</span><span class="at">DECIMAL</span></div>
+            <div class="er"><span class="an">date_incident</span><span class="at">DATETIME</span></div>
+            <div class="er"><span class="an">resolu</span><span class="at">BOOL</span></div>
+            <div class="er new"><span class="an new">gestionnaire_email ★</span><span class="at">FK</span></div>
+          </div>
+        </div>
+
+        <div class="e" style="left:30px;top:690px;width:215px">
+          <div class="eh" style="background:#1E5FA5">MAINTENANCE</div>
+          <div class="eb">
+            <div class="er"><span class="an id">id_maintenance</span><span class="at">INT</span></div>
+            <div class="er"><span class="an">type_intervention</span><span class="at">ENUM</span></div>
+            <div class="er"><span class="an">date_debut</span><span class="at">DATE</span></div>
+            <div class="er"><span class="an">date_fin</span><span class="at">DATE</span></div>
+            <div class="er"><span class="an">cout</span><span class="at">DECIMAL</span></div>
+            <div class="er"><span class="an">technicien</span><span class="at">VARCHAR</span></div>
+            <div class="er"><span class="an">statut</span><span class="at">ENUM</span></div>
+            <div class="er new"><span class="an new">gestionnaire_email ★</span><span class="at">FK</span></div>
+          </div>
+        </div>
+
+      </div><!-- /cv -->
+    </div><!-- /dc -->
+
+    <!-- LÉGENDE -->
+    <div class="leg-wrap">
+      <span style="font-weight:600;font-size:.85rem;color:#374151">Légende :</span>
+      <div class="li">
+        <div class="ld" style="background:#1E5FA5"></div>Véhicules &amp; Maintenance
+      </div>
+      <div class="li">
+        <div class="ld" style="background:#0F6E56"></div>Personnel
+      </div>
+      <div class="li">
+        <div class="ld" style="background:#7A4E08"></div>Opérations
+      </div>
+      <div class="li">
+        <div class="ld" style="background:#534AB7"></div>Réseau (Lignes / Tarifs / Arrêts / Horaires)
+      </div>
+      <div class="li">
+        <div class="ld" style="background:#993C1D"></div>Incidents
+      </div>
+      <div class="li">
+        <div class="ld" style="background:#3B6D11"></div>Système IA (Utilisateur / Logs)
+      </div>
+      <div class="ls"></div>
+      <div class="li"><u style="font-weight:700">identifiant</u> = clé conceptuelle soulignée</div>
+      <div class="li"><span style="color:#b91c1c;font-weight:700">0,N · 1,N · 1,1 · 0,1</span> = cardinalités Merise
+      </div>
+      <div class="li"><span
+          style="background:#f0fdf4;border:1px solid #86efac;padding:1px 5px;border-radius:3px;font-size:.75rem;color:#166534">attr</span>
+        = attribut d'association</div>
+      <div class="li"><span
+          style="background:#fefce8;border:1px solid #fcd34d;padding:1px 5px;border-radius:3px;font-size:.75rem;color:#854d0e">★</span>
+        = enrichissement Text-to-SQL</div>
+    </div>
+
+    <!-- EXEMPLES DE LECTURE -->
+    <div class="rd">
+      <h3>📖 Lecture des 10 associations</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Association</th>
+            <th>Cardinalités</th>
+            <th>Lecture &amp; utilité IA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>①</td>
+            <td>VÉHICULE — <span class="as">conduit</span> — CHAUFFEUR</td>
+            <td><span class="ca">(0,N) : (0,1)</span></td>
+            <td>Un véhicule est attribué à <strong>0 ou 1 chauffeur</strong>. Un chauffeur peut avoir conduit <strong>0
+                ou N véhicules</strong> dans le temps.</td>
+          </tr>
+          <tr>
+            <td>②</td>
+            <td>VÉHICULE — <span class="as">utilise</span> — TRAJET</td>
+            <td><span class="ca">(0,N) : (1,1)</span></td>
+            <td>Un trajet utilise <strong>exactement 1 véhicule</strong>. Un véhicule peut figurer dans <strong>0 ou N
+                trajets</strong>.</td>
+          </tr>
+          <tr>
+            <td>③</td>
+            <td>VÉHICULE — <span class="as">subit</span> — MAINTENANCE</td>
+            <td><span class="ca">(0,N) : (1,1)</span></td>
+            <td>Une maintenance concerne <strong>exactement 1 véhicule</strong>. Un véhicule peut subir <strong>0 ou N
+                interventions</strong>. L'attribut <em>kilometrage_seuil</em> ★ permet à l'IA de répondre : <em>"Quels
+                véhicules nécessitent une maintenance ?"</em></td>
+          </tr>
+          <tr>
+            <td>④</td>
+            <td>CHAUFFEUR — <span class="as">effectue</span> — TRAJET</td>
+            <td><span class="ca">(0,N) : (1,1)</span></td>
+            <td>Un trajet est effectué par <strong>exactement 1 chauffeur</strong>. Jointure INCIDENT→TRAJET→CHAUFFEUR
+              permet : <em>"Quel chauffeur a le plus d'incidents ?"</em></td>
+          </tr>
+          <tr>
+            <td>⑤</td>
+            <td>TRAJET — <span class="as">planifie</span> — LIGNE</td>
+            <td><span class="ca">(1,1) : (1,N)</span></td>
+            <td>Un trajet appartient à <strong>exactement 1 ligne</strong>. Une ligne regroupe <strong>1 ou N
+                trajets</strong>.</td>
+          </tr>
+          <tr>
+            <td>⑥</td>
+            <td>LIGNE — <span class="as">applique</span> — TARIF</td>
+            <td><span class="ca">(1,N) : (1,1)</span></td>
+            <td>Un tarif est propre à <strong>1 ligne</strong>. Une ligne définit <strong>1 ou N tarifs</strong> (normal
+              / adulte / enfant). Le tarif <em>normal</em> = plein tarif, <em>adulte</em> = réduit adulte, <em>enfant</em> = réduit enfant.</td>
+          </tr>
+          <tr>
+            <td>⑦</td>
+            <td>LIGNE — <span class="as">passe_par</span> — ARRET<br><small style="color:#166534">+ ordre,
+                temps_estime</small></td>
+            <td><span class="ca">(1,N) : (0,N)</span></td>
+            <td>Association N:M → table <code>ligne_arrets</code> dans le MLD. <em>temps_estime</em> ★ permet de
+              calculer l'heure d'arrivée à un arrêt précis.</td>
+          </tr>
+          <tr>
+            <td>⑧</td>
+            <td>TRAJET — <span class="as">génère</span> — INCIDENT</td>
+            <td><span class="ca">(0,N) : (1,1)</span></td>
+            <td>Un incident est lié à <strong>exactement 1 trajet</strong>. Un trajet peut générer <strong>0 ou N
+                incidents</strong>.</td>
+          </tr>
+          <tr>
+            <td>⑨</td>
+            <td>LIGNE — <span class="as">définit</span> — HORAIRE</td>
+            <td><span class="ca">(1,N) : (1,1)</span></td>
+            <td>Un horaire appartient à <strong>1 ligne</strong>. Une ligne a <strong>1 ou N horaires</strong>. Permet à
+              l'IA de calculer : <em>retard = heure_reelle − heure_theorique</em>.</td>
+          </tr>
+          <tr>
+            <td>⑩</td>
+            <td>UTILISATEUR — <span class="as">génère</span> — LOGS_REQUETES</td>
+            <td><span class="ca">(1,1) : (0,N)</span></td>
+            <td>Un log appartient à <strong>1 utilisateur</strong>. Un utilisateur génère <strong>0 ou N requêtes
+                IA</strong>. Permet l'audit et l'historique du chatbot.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+
+</html>

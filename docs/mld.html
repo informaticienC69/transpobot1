@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLD &amp; Dictionnaire de Données — TranspoBot | ESP/UCAD DIC1</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#f0f4f8;color:#1a202c}
+  header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);color:white;
+    padding:1.4rem 2rem;display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 4px 20px rgba(0,0,0,.3)}
+  header h1{font-size:1.4rem;font-weight:700}
+  header p{color:#94a3b8;font-size:.75rem;margin-top:4px}
+  .badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+    padding:.5rem 1.2rem;border-radius:8px;text-align:center;font-size:.75rem}
+  .badge strong{display:block;font-size:1rem}
+  main{padding:1.5rem 2rem;max-width:1200px;margin:0 auto}
+  .tabs{display:flex;gap:.5rem;margin-bottom:1.5rem}
+  .tab{padding:.5rem 1.4rem;border-radius:8px;border:2px solid #e5e7eb;
+    background:white;cursor:pointer;font-size:.78rem;font-weight:600;color:#6b7280;transition:all .2s}
+  .tab.active{background:#1e40af;color:white;border-color:#1e40af}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+  .section{margin-bottom:1.6rem}
+  .sec-title{font-size:.8rem;font-weight:700;color:#fff;padding:.6rem 1rem;
+    border-radius:8px 8px 0 0;display:flex;align-items:center;gap:8px;letter-spacing:.3px}
+  .mld-box{background:#fff;border:1px solid #e5e7eb;border-top:none;
+    border-radius:0 0 8px 8px;padding:1.2rem 1.4rem;
+    box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .rel{font-family:'Fira Code',monospace;font-size:.8rem;line-height:2.2;color:#374151}
+  .rel-name{font-weight:700;color:#111827}
+  .pk{text-decoration:underline;font-weight:700;color:#b45309}
+  .fk{color:#6d28d9;font-style:italic}
+  .new{color:#166534;font-weight:600}
+  .mld-legend{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;
+    padding:.8rem 1.2rem;font-size:.75rem;color:#1e3a8a;
+    display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem}
+  .leg-item{display:flex;align-items:center;gap:.4rem}
+  .dict-card{background:white;border-radius:10px;overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:1.4rem}
+  .dict-hdr{padding:.65rem 1rem;color:white;font-weight:700;font-size:.8rem;
+    display:flex;align-items:center;gap:.5rem}
+  table{width:100%;border-collapse:collapse;font-size:.75rem}
+  th{background:#f9fafb;color:#374151;padding:.5rem 1rem;
+     text-align:left;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:.72rem}
+  td{padding:.48rem 1rem;border-bottom:1px solid #f0f4f8;color:#4b5563;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafafa}
+  td:first-child{font-family:'Fira Code',monospace;font-size:.75rem}
+  .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:.65rem;font-weight:700}
+  .tpk{background:rgba(180,83,9,.1);color:#b45309}
+  .tfk{background:rgba(109,40,217,.1);color:#6d28d9}
+  .tnn{background:rgba(16,110,86,.1);color:#0F6E56}
+  .tuq{background:rgba(30,95,165,.1);color:#1E5FA5}
+  .tnew{background:#fefce8;color:#854d0e;border:1px solid #fcd34d}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📋 MLD &amp; Dictionnaire de Données — TranspoBot</h1>
+    <p>Modèle Logique de Données · Notation Merise · ESP/UCAD — DIC1 Génie Informatique</p>
+  </div>
+  <div class="badge"><strong>13 Tables SQL</strong>Dictionnaire de données complet</div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('mld',this)">📐 MLD</button>
+    <button class="tab" onclick="showTab('dict',this)">📖 Dictionnaire de Données</button>
+  </div>
+
+  <!-- ══════════ TAB MLD ══════════ -->
+  <div id="mld" class="tab-content active">
+
+    <div class="mld-legend">
+      <span style="font-weight:600">Notation Merise :</span>
+      <span class="leg-item"><span class="pk">#attribut</span> = Clé Primaire (PK)</span>
+      <span class="leg-item"><span class="fk">@attribut</span> = Clé Étrangère (FK)</span>
+      <span class="leg-item">attribut = Attribut ordinaire</span>
+      <span class="leg-item"><span class="new">attribut★</span> = Enrichissement Text-to-SQL</span>
+    </div>
+
+    <!-- Véhicules & Maintenance -->
+    <div class="section">
+      <div class="sec-title" style="background:#1E5FA5">🚌 Véhicules &amp; Maintenance</div>
+      <div class="mld-box">
+        <div class="rel">
+          <span class="rel-name">vehicules</span>(<span class="pk">#immatriculation</span>, type, marque, modele, capacite, <span class="new">statut★</span>, kilometrage, <span class="new">kilometrage_seuil★</span>, <span class="new">date_derniere_revision★</span>, date_acquisition, created_at)
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">maintenances</span>(<span class="pk">#id_maintenance</span>, <span class="fk">@vehicule_immatriculation</span>, type_intervention, date_debut, date_fin, cout, technicien, statut, <span class="new">@gestionnaire_email★</span>, created_at)
+        </div>
+      </div>
+    </div>
+
+    <!-- Personnel -->
+    <div class="section">
+      <div class="sec-title" style="background:#0F6E56">👤 Personnel &amp; Accès</div>
+      <div class="mld-box">
+        <div class="rel">
+          <span class="rel-name">chauffeurs</span>(<span class="pk">#numero_permis</span>, <span class="fk">@vehicule_immatriculation</span>, nom, prenom, email, telephone, categorie_permis, disponibilite, note_moyenne, date_embauche, created_at)
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">utilisateurs</span>(<span class="pk">#email</span>, nom, mot_de_passe_hash, role, <span class="new">statut★</span>, <span class="new">token_activation★</span>, <span class="new">token_expiration★</span>, created_at)
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">logs_requetes</span>(<span class="pk">#id_log</span>, <span class="fk">@utilisateur_email</span>, question, sql_genere, temps_reponse_ms, date_requete)
+        </div>
+      </div>
+    </div>
+
+    <!-- Réseau -->
+    <div class="section">
+      <div class="sec-title" style="background:#534AB7">🗺️ Réseau de Transport</div>
+      <div class="mld-box">
+        <div class="rel">
+          <span class="rel-name">lignes</span>(<span class="pk">#code</span>, nom, origine, destination, distance_km, duree_minutes)
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">tarifs</span>(<span class="pk">#type_client</span>, <span class="pk"><span class="fk">#@ligne_code</span></span>, prix)
+          <span style="color:#6b7280;font-size:.78rem;font-family:'Inter',sans-serif;margin-left:.5rem">&larr; type_client : ENUM('normal','adulte','enfant')</span>
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">horaires</span>(<span class="pk">#id_horaire</span>, <span class="fk">@ligne_code</span>, heure_depart_theorique, heure_arrivee_theorique, jours_operation, frequence_minutes)
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">arrets</span>(<span class="pk">#nom</span>, adresse, latitude, longitude)
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">ligne_arrets</span>(<span class="pk"><span class="fk">#@ligne_code</span></span>, <span class="pk"><span class="fk">#@arret_nom</span></span>, ordre, <span class="new">temps_estime★</span>)
+          <span style="color:#6b7280;font-size:.78rem;font-family:'Inter',sans-serif;margin-left:.5rem">← association N:M LIGNE ↔ ARRET</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opérations -->
+    <div class="section">
+      <div class="sec-title" style="background:#7A4E08">🚌 Opérations</div>
+      <div class="mld-box">
+        <div class="rel">
+          <span class="rel-name">trajets</span>(<span class="pk">#id_trajet</span>, <span class="fk">@ligne_code</span>, <span class="fk">@chauffeur_permis</span>, <span class="fk">@vehicule_immatriculation</span>, date_heure_depart, date_heure_arrivee, statut, nb_passagers, recette, retard_minutes, <span class="new">@gestionnaire_email★</span>, created_at)
+        </div>
+        <div class="rel" style="margin-top:.6rem">
+          <span class="rel-name">incidents</span>(<span class="pk">#id_incident</span>, <span class="fk">@trajet_id</span>, type, description, gravite, cout_reparation, date_incident, resolu, <span class="new">@gestionnaire_email★</span>, created_at)
+        </div>
+      </div>
+    </div>
+
+    <!-- Sécurité Système -->
+    <div class="section">
+      <div class="sec-title" style="background:#374151">🔒 Sécurité Système</div>
+      <div class="mld-box">
+        <div class="rel">
+          <span class="rel-name">logs_securite</span>(<span class="pk">#id_log</span>, ip, geolocalisation, type_evenement, details, date_evenement)
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab mld -->
+
+  <!-- ══════════ TAB DICTIONNAIRE ══════════ -->
+  <div id="dict" class="tab-content">
+
+    <!-- VEHICULES -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#1E5FA5">🚌 vehicules</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#immatriculation</td><td>VARCHAR(20)</td><td><span class="tag tpk">PK</span> <span class="tag tnn">NOT NULL</span></td><td>Identifiant unique (ex: DK-1234-AB)</td></tr>
+          <tr><td>type</td><td>ENUM</td><td><span class="tag tnn">NOT NULL</span></td><td>bus / minibus / taxi</td></tr>
+          <tr><td>marque</td><td>VARCHAR(50)</td><td>—</td><td>Marque constructeur (ex: Mercedes)</td></tr>
+          <tr><td>modele</td><td>VARCHAR(50)</td><td>—</td><td>Modèle (ex: Sprinter)</td></tr>
+          <tr><td>capacite</td><td>INT</td><td><span class="tag tnn">NOT NULL</span></td><td>Nombre de places assises</td></tr>
+          <tr><td>statut</td><td>ENUM</td><td>DEFAULT 'actif'</td><td>actif / <strong>en_panne</strong> / maintenance / hors_service</td></tr>
+          <tr><td>kilometrage</td><td>INT</td><td>DEFAULT 0</td><td>Kilométrage total parcouru</td></tr>
+          <tr><td>kilometrage_seuil★</td><td>INT</td><td><span class="tag tnew">★ nouveau</span></td><td>Seuil déclenchant une alerte maintenance (ex: 80 000 km)</td></tr>
+          <tr><td>date_derniere_revision★</td><td>DATE</td><td><span class="tag tnew">★ nouveau</span></td><td>Date de la dernière révision technique</td></tr>
+          <tr><td>date_acquisition</td><td>DATE</td><td>—</td><td>Date d'achat du véhicule</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MAINTENANCES -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#1E5FA5">🔧 maintenances</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#id_maintenance</td><td>INT</td><td><span class="tag tpk">PK</span> AUTO_INCREMENT</td><td>Identifiant unique</td></tr>
+          <tr><td>@vehicule_immatriculation</td><td>VARCHAR(20)</td><td><span class="tag tfk">FK</span> → vehicules.immatriculation</td><td>Véhicule concerné par l'intervention</td></tr>
+          <tr><td>type_intervention</td><td>ENUM</td><td><span class="tag tnn">NOT NULL</span></td><td>vidange / revision / reparation / controle</td></tr>
+          <tr><td>date_debut</td><td>DATE</td><td><span class="tag tnn">NOT NULL</span></td><td>Date de début de l'intervention</td></tr>
+          <tr><td>date_fin</td><td>DATE</td><td>—</td><td>Date de fin (NULL si en cours)</td></tr>
+          <tr><td>cout</td><td>DECIMAL(10,2)</td><td>—</td><td>Coût total en FCFA</td></tr>
+          <tr><td>technicien</td><td>VARCHAR(100)</td><td>—</td><td>Nom du technicien ou garage</td></tr>
+          <tr><td>statut</td><td>ENUM</td><td>DEFAULT 'en_cours'</td><td>en_cours / terminee</td></tr>
+          <tr><td>@gestionnaire_email ★</td><td>VARCHAR(150)</td><td><span class="tag tfk">FK</span> → utilisateurs.email</td><td>Gestionnaire ayant enregistré l'intervention</td></tr>
+          <tr><td>created_at</td><td>TIMESTAMP</td><td>DEFAULT NOW()</td><td>Date d'enregistrement</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CHAUFFEURS -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#0F6E56">👤 chauffeurs</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#numero_permis</td><td>VARCHAR(30)</td><td><span class="tag tpk">PK</span> <span class="tag tnn">NOT NULL</span></td><td>Identifiant unique (Numéro de permis)</td></tr>
+          <tr><td>@vehicule_immatriculation</td><td>VARCHAR(20)</td><td><span class="tag tfk">FK</span> → vehicules.immatriculation</td><td>Véhicule actuellement attribué (nullable)</td></tr>
+          <tr><td>nom</td><td>VARCHAR(100)</td><td><span class="tag tnn">NOT NULL</span></td><td>Nom de famille</td></tr>
+          <tr><td>prenom</td><td>VARCHAR(100)</td><td><span class="tag tnn">NOT NULL</span></td><td>Prénom</td></tr>
+          <tr><td>email</td><td>VARCHAR(150)</td><td><span class="tag tuq">UNIQUE</span></td><td>Email professionnel</td></tr>
+          <tr><td>telephone</td><td>VARCHAR(20)</td><td>—</td><td>Numéro de téléphone</td></tr>
+          <tr><td>categorie_permis</td><td>VARCHAR(5)</td><td>—</td><td>Catégorie permis (B, D…)</td></tr>
+          <tr><td>disponibilite</td><td>BOOLEAN</td><td>DEFAULT TRUE</td><td>Disponible pour un trajet</td></tr>
+          <tr><td>note_moyenne</td><td>DECIMAL(3,2)</td><td>—</td><td>Note moyenne sur 5 (évaluation qualité)</td></tr>
+          <tr><td>date_embauche</td><td>DATE</td><td>—</td><td>Date d'embauche dans la compagnie</td></tr>
+          <tr><td>created_at</td><td>TIMESTAMP</td><td>DEFAULT NOW()</td><td>Date d'enregistrement</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- UTILISATEURS -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#3B6D11">🔐 utilisateurs</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#email</td><td>VARCHAR(150)</td><td><span class="tag tpk">PK</span> <span class="tag tnn">NOT NULL</span></td><td>Email de connexion (Identifiant unique)</td></tr>
+          <tr><td>nom</td><td>VARCHAR(100)</td><td><span class="tag tnn">NOT NULL</span></td><td>Nom complet de l'utilisateur</td></tr>
+          <tr><td>mot_de_passe_hash</td><td>VARCHAR(255)</td><td><span class="tag tnn">NOT NULL</span></td><td>Mot de passe hashé (bcrypt)</td></tr>
+          <tr><td>role</td><td>ENUM</td><td>DEFAULT 'gestionnaire'</td><td>admin / gestionnaire / lecteur</td></tr>
+          <tr><td>statut ★</td><td>ENUM</td><td>DEFAULT 'en_attente'</td><td>en_attente / actif / revoque — gère le cycle de vie du compte</td></tr>
+          <tr><td>token_activation ★</td><td>VARCHAR(255)</td><td>—</td><td>Token SHA-256 d'activation (lien email)</td></tr>
+          <tr><td>token_expiration ★</td><td>DATETIME</td><td>—</td><td>Expiration du token (48h après création)</td></tr>
+          <tr><td>created_at</td><td>DATETIME</td><td>DEFAULT NOW()</td><td>Date de création du compte</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LOGS_REQUETES -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#3B6D11">🤖 logs_requetes</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#id_log</td><td>INT</td><td><span class="tag tpk">PK</span> AUTO_INCREMENT</td><td>Identifiant unique du log</td></tr>
+          <tr><td>@utilisateur_email</td><td>VARCHAR(150)</td><td><span class="tag tfk">FK</span> → utilisateurs.email</td><td>Utilisateur ayant posé la question</td></tr>
+          <tr><td>question</td><td>TEXT</td><td><span class="tag tnn">NOT NULL</span></td><td>Question posée en langage naturel</td></tr>
+          <tr><td>sql_genere</td><td>TEXT</td><td>—</td><td>Requête SQL générée par le LLM</td></tr>
+          <tr><td>temps_reponse_ms</td><td>INT</td><td>—</td><td>Durée de réponse de l'IA (millisecondes)</td></tr>
+          <tr><td>date_requete</td><td>DATETIME</td><td>DEFAULT NOW()</td><td>Horodatage de la requête</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LIGNES -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#534AB7">🗺️ lignes</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#code</td><td>VARCHAR(10)</td><td><span class="tag tpk">PK</span> <span class="tag tnn">NOT NULL</span></td><td>Identifiant unique (ex: L1, L2)</td></tr>
+          <tr><td>nom</td><td>VARCHAR(100)</td><td>—</td><td>Nom complet de la ligne</td></tr>
+          <tr><td>origine</td><td>VARCHAR(100)</td><td><span class="tag tnn">NOT NULL</span></td><td>Point de départ (ex: Dakar)</td></tr>
+          <tr><td>destination</td><td>VARCHAR(100)</td><td><span class="tag tnn">NOT NULL</span></td><td>Point d'arrivée (ex: Thiès)</td></tr>
+          <tr><td>distance_km</td><td>DECIMAL(6,2)</td><td>—</td><td>Distance totale en kilomètres</td></tr>
+          <tr><td>duree_minutes</td><td>INT</td><td>—</td><td>Durée estimée en minutes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TARIFS -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#534AB7">💰 tarifs</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#type_client</td><td>ENUM</td><td><span class="tag tpk">PK</span> <span class="tag tnn">NOT NULL</span></td><td>normal / adulte / enfant</td></tr>
+          <tr><td>#@ligne_code</td><td>VARCHAR(10)</td><td><span class="tag tpk">PK</span> <span class="tag tfk">FK</span> → lignes.code</td><td>Ligne concernée par ce tarif</td></tr>
+          <tr><td>prix</td><td>DECIMAL(10,2)</td><td><span class="tag tnn">NOT NULL</span></td><td>Prix en FCFA</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- HORAIRES -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#534AB7">🕐 horaires</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#id_horaire</td><td>INT</td><td><span class="tag tpk">PK</span> AUTO_INCREMENT</td><td>Identifiant unique de l'horaire</td></tr>
+          <tr><td>@ligne_code</td><td>VARCHAR(10)</td><td><span class="tag tfk">FK</span> → lignes.code</td><td>Ligne concernée</td></tr>
+          <tr><td>heure_depart_theorique</td><td>TIME</td><td><span class="tag tnn">NOT NULL</span></td><td>Heure de départ théorique (ex: 06:00)</td></tr>
+          <tr><td>heure_arrivee_theorique</td><td>TIME</td><td>—</td><td>Heure d'arrivée théorique au terminus</td></tr>
+          <tr><td>jours_operation</td><td>VARCHAR(50)</td><td>—</td><td>Jours de service (ex: lundi-vendredi)</td></tr>
+          <tr><td>frequence_minutes</td><td>INT</td><td>—</td><td>Fréquence de passage en minutes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ARRETS -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#534AB7">📍 arrets</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#nom</td><td>VARCHAR(100)</td><td><span class="tag tpk">PK</span> <span class="tag tnn">NOT NULL</span></td><td>Identifiant (ex: Gare Routière Dakar)</td></tr>
+          <tr><td>adresse</td><td>VARCHAR(200)</td><td>—</td><td>Description de la localisation</td></tr>
+          <tr><td>latitude</td><td>DECIMAL(10,7)</td><td>—</td><td>Coordonnée GPS latitude</td></tr>
+          <tr><td>longitude</td><td>DECIMAL(10,7)</td><td>—</td><td>Coordonnée GPS longitude</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LIGNE_ARRETS -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#534AB7">🔗 ligne_arrets &nbsp;<small style="font-weight:400;opacity:.85">(association N:M — LIGNE ↔ ARRET)</small></div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#@ligne_code</td><td>VARCHAR(10)</td><td><span class="tag tpk">PK</span> <span class="tag tfk">FK</span> → lignes.code</td><td>Ligne concernée</td></tr>
+          <tr><td>#@arret_nom</td><td>VARCHAR(100)</td><td><span class="tag tpk">PK</span> <span class="tag tfk">FK</span> → arrets.nom</td><td>Arrêt desservi</td></tr>
+          <tr><td>ordre</td><td>INT</td><td><span class="tag tnn">NOT NULL</span></td><td>Position de l'arrêt sur la ligne (1 = départ)</td></tr>
+          <tr><td>temps_estime★</td><td>INT</td><td><span class="tag tnew">★ nouveau</span></td><td>Minutes depuis le départ pour atteindre cet arrêt</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TRAJETS -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#7A4E08">🚌 trajets</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#id_trajet</td><td>INT</td><td><span class="tag tpk">PK</span> AUTO_INCREMENT</td><td>Identifiant unique du trajet</td></tr>
+          <tr><td>@ligne_code</td><td>VARCHAR(10)</td><td><span class="tag tnn">NOT NULL</span> <span class="tag tfk">FK</span> → lignes.code</td><td>Ligne empruntée</td></tr>
+          <tr><td>@chauffeur_permis</td><td>VARCHAR(30)</td><td><span class="tag tnn">NOT NULL</span> <span class="tag tfk">FK</span> → chauffeurs.numero_permis</td><td>Chauffeur effectuant le trajet</td></tr>
+          <tr><td>@vehicule_immatriculation</td><td>VARCHAR(20)</td><td><span class="tag tnn">NOT NULL</span> <span class="tag tfk">FK</span> → vehicules.immatriculation</td><td>Véhicule utilisé</td></tr>
+          <tr><td>date_heure_depart</td><td>DATETIME</td><td><span class="tag tnn">NOT NULL</span></td><td>Heure de départ réelle</td></tr>
+          <tr><td>date_heure_arrivee</td><td>DATETIME</td><td>—</td><td>Heure d'arrivée réelle (NULL si en cours)</td></tr>
+          <tr><td>statut</td><td>ENUM</td><td>DEFAULT 'planifie'</td><td>planifie / en_cours / termine / annule</td></tr>
+          <tr><td>nb_passagers</td><td>INT</td><td>DEFAULT 0</td><td>Nombre de passagers transportés</td></tr>
+          <tr><td>recette</td><td>DECIMAL(10,2)</td><td>DEFAULT 0</td><td>Recette totale en FCFA</td></tr>
+          <tr><td>retard_minutes</td><td>INT</td><td>DEFAULT 0</td><td>Retard constaté en minutes</td></tr>
+          <tr><td>@gestionnaire_email ★</td><td>VARCHAR(150)</td><td><span class="tag tfk">FK</span> → utilisateurs.email</td><td>Gestionnaire ayant planifié / terminé le trajet (traçabilité)</td></tr>
+          <tr><td>created_at</td><td>TIMESTAMP</td><td>DEFAULT NOW()</td><td>Date d'enregistrement du trajet</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- INCIDENTS -->
+    <div class="dict-card">
+      <div class="dict-hdr" style="background:#993C1D">⚠️ incidents</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#id_incident</td><td>INT</td><td><span class="tag tpk">PK</span> AUTO_INCREMENT</td><td>Identifiant unique de l'incident</td></tr>
+          <tr><td>@trajet_id</td><td>INT</td><td><span class="tag tnn">NOT NULL</span> <span class="tag tfk">FK</span> → trajets.id_trajet</td><td>Trajet concerné par l'incident</td></tr>
+          <tr><td>type</td><td>ENUM</td><td><span class="tag tnn">NOT NULL</span></td><td>panne / accident / retard / autre</td></tr>
+          <tr><td>description</td><td>TEXT</td><td>—</td><td>Description détaillée</td></tr>
+          <tr><td>gravite</td><td>ENUM</td><td>DEFAULT 'faible'</td><td>faible / moyen / grave</td></tr>
+          <tr><td>cout_reparation</td><td>DECIMAL(10,2)</td><td>—</td><td>Coût estimé de réparation en FCFA</td></tr>
+          <tr><td>date_incident</td><td>DATETIME</td><td><span class="tag tnn">NOT NULL</span></td><td>Date et heure de l'incident</td></tr>
+          <tr><td>resolu</td><td>BOOLEAN</td><td>DEFAULT FALSE</td><td>TRUE si l'incident est résolu</td></tr>
+          <tr><td>@gestionnaire_email ★</td><td>VARCHAR(150)</td><td><span class="tag tfk">FK</span> → utilisateurs.email</td><td>Gestionnaire ayant signalé l'incident (traçabilité)</td></tr>
+          <tr><td>created_at</td><td>TIMESTAMP</td><td>DEFAULT NOW()</td><td>Date d'enregistrement de l'incident</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /tab dict -->
+
+    <!-- LOGS_SECURITE -->
+    <div class="dict-card" id="dict-logs-securite" style="display:none">
+      <div class="dict-hdr" style="background:#374151">🔒 logs_securite</div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Type SQL</th><th>Clé / Contrainte</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#id_log</td><td>INT</td><td><span class="tag tpk">PK</span> AUTO_INCREMENT</td><td>Identifiant unique de l'événement</td></tr>
+          <tr><td>date_evenement</td><td>DATETIME</td><td>DEFAULT NOW()</td><td>Horodatage de l'événement sécurité</td></tr>
+          <tr><td>ip</td><td>VARCHAR(45)</td><td>—</td><td>Adresse IP de l'émetteur</td></tr>
+          <tr><td>geolocalisation</td><td>VARCHAR(100)</td><td>—</td><td>Pays / Ville déduit de l'IP</td></tr>
+          <tr><td>type_evenement</td><td>VARCHAR(50)</td><td><span class="tag tnn">NOT NULL</span></td><td>USER_LOGIN / FAILED_LOGIN / BRUTE_FORCE_BLOCKED / SQL_INJECTION_ATTEMPT / etc.</td></tr>
+          <tr><td>details</td><td>TEXT</td><td>—</td><td>Message contextuel de l'événement</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /tab dict -->
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  // Afficher logs_securite dans le bon onglet
+  const ls = document.getElementById('dict-logs-securite');
+  if (ls) ls.style.display = (id === 'dict') ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

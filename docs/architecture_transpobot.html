@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture TranspoBot</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 15mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    font-family: 'Inter', sans-serif; 
+    background: #ffffff; 
+    color: #1e293b; 
+    width: 210mm; 
+    min-height: 297mm; 
+    margin: 0 auto; /* Pour centrer à l'écran avant impression */
+    padding: 10mm 15mm;
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px;
+  }
+  
+  header { text-align: center; margin-bottom: 10px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
+  h1 { font-size: 18pt; color: #0f172a; font-weight: 800; margin-bottom: 5px; }
+  p.subtitle { color: #64748b; font-size: 11pt; }
+
+  .panel {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    page-break-inside: avoid;
+  }
+
+  h2 {
+    font-size: 14pt;
+    color: #1e293b;
+    border-bottom: 2px solid #3b82f6;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .svg-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  svg { width: 100%; height: auto; max-height: 350px; }
+  
+  .node { fill: #ffffff; stroke-width: 2.5; rx: 8; }
+  .front { stroke: #f59e0b; }
+  .back { stroke: #3b82f6; }
+  .db { stroke: #10b981; }
+  .ia { stroke: #8b5cf6; }
+  .human { stroke: #64748b; fill: #f8fafc; stroke-width: 2; }
+  .cloud { fill: #f8fafc; stroke: #94a3b8; stroke-dasharray: 6 4; stroke-width: 2; rx: 12; }
+
+  .n-title { font-size: 12px; font-weight: 700; fill: #0f172a; font-family: 'Inter', sans-serif; text-anchor: middle; }
+  .n-sub { font-size: 10px; font-weight: 500; fill: #64748b; font-family: 'Inter', sans-serif; text-anchor: middle; }
+  
+  .edge { stroke: #94a3b8; stroke-width: 2; fill: none; stroke-dasharray: 4 2; }
+  .edge.solid { stroke-dasharray: none; stroke-width: 2.5; }
+  .arrow-head { fill: #94a3b8; }
+  
+  .e-bg { fill: white; rx: 3; }
+  .e-txt { font-size: 9px; font-weight: 600; fill: #475569; font-family: 'Inter', sans-serif; text-anchor: middle; }
+
+  /* TECH STACK */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .tech-item { 
+    background: #f8fafc; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 6px; 
+    padding: 10px; 
+  }
+  
+  .t-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .t-left { display: flex; align-items: center; gap: 6px; }
+  .t-icon { font-size: 14pt; }
+  .t-name { font-weight: 700; font-size: 12pt; color: #0f172a; }
+  .t-badge { background: #e0f2fe; color: #0369a1; font-size: 8pt; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+  
+  .t-desc { font-size: 10pt; color: #475569; margin-bottom: 8px; text-align: justify; line-height: 1.35; font-weight: 500; }
+  .t-list { font-size: 9.5pt; color: #334155; padding-left: 20px; line-height: 1.4; list-style: square; }
+  .t-list li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TranspoBot — Schéma Technique Décisionnel</h1>
+  <p class="subtitle">Architecture et Justification des choix technologiques</p>
+</header>
+
+<div class="panel">
+  <h2>1. Schéma d'Architecture Cible</h2>
+    
+    <div class="svg-container">
+      <svg viewBox="0 0 760 380" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head" />
+          </marker>
+          <marker id="arrow-reverse" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 10 0 L 0 5 L 10 10 z" class="arrow-head" />
+          </marker>
+        </defs>
+
+        <!-- ZONE CLOUD DEPLOIEMENT -->
+        <rect x="360" y="30" width="220" height="310" class="cloud" />
+        <text x="470" y="55" class="n-title" style="fill:#64748b;">Déploiement (Cloud / VPS)</text>
+
+        <!-- HUMAN -->
+        <rect x="20" y="160" width="80" height="30" class="node human" />
+        <text x="60" y="180" class="n-title" style="font-size: 10px;">👤 Utilisateur</text>
+
+        <!-- FRONTEND & CHAT -->
+        <rect x="150" y="140" width="140" height="70" class="node front" />
+        <text x="220" y="166" class="n-title">Dashboard Web</text>
+        <text x="220" y="182" class="n-sub">Interface + Chat Intégré</text>
+        <text x="220" y="196" class="n-sub" style="font-size: 9px; fill: #f59e0b;">(HTML/CSS/JS)</text>
+
+        <!-- BACKEND -->
+        <rect x="390" y="140" width="160" height="70" class="node back" />
+        <text x="470" y="166" class="n-title">Backend API</text>
+        <text x="470" y="182" class="n-sub">Logique métier & SQL Agents</text>
+        <text x="470" y="196" class="n-sub" style="font-size: 9px; fill: #3b82f6;">Python (FastAPI)</text>
+
+        <!-- BDD -->
+        <rect x="405" y="250" width="130" height="60" class="node db" />
+        <text x="470" y="275" class="n-title">Base de Données</text>
+        <text x="470" y="291" class="n-sub">MySQL 8.0</text>
+
+        <!-- IA -->
+        <rect x="630" y="145" width="110" height="60" class="node ia" />
+        <text x="685" y="170" class="n-title">API LLM</text>
+        <text x="685" y="186" class="n-sub">Groq / LLaMA-3.3-70b</text>
+        <text x="685" y="198" class="n-sub" style="font-size: 8px;">(Cloud Groq)</text>
+
+        <!-- EDGES -->
+        <!-- User to Front -->
+        <line x1="100" y1="175" x2="140" y2="175" class="edge solid" marker-end="url(#arrow)" />
+
+        <!-- Front to Back -->
+        <line x1="290" y1="175" x2="380" y2="175" class="edge solid" marker-end="url(#arrow)" marker-start="url(#arrow-reverse)" />
+        <rect x="300" y="163" width="70" height="14" class="e-bg" />
+        <text x="335" y="173" class="e-txt">REST / JSON</text>
+
+        <!-- Back to DB -->
+        <line x1="470" y1="210" x2="470" y2="240" class="edge solid" marker-end="url(#arrow)" marker-start="url(#arrow-reverse)" />
+        <rect x="445" y="218" width="50" height="14" class="e-bg" />
+        <text x="470" y="228" class="e-txt">SQL Natif</text>
+
+        <!-- Back to IA -->
+        <line x1="550" y1="175" x2="620" y2="175" class="edge solid" marker-end="url(#arrow)" />
+        <rect x="560" y="163" width="52" height="14" class="e-bg" />
+        <text x="586" y="173" class="e-txt">Prompt IA</text>
+
+      </svg>
+    </div>
+  </div>
+
+    </div>
+</div>
+
+<div class="panel">
+  <h2>2. Justification des Décisions Techniques</h2>
+  <div class="tech-grid">
+    <!-- FRONTEND & CHAT -->
+    <div class="tech-item">
+      <div class="t-head">
+        <div class="t-left"><span class="t-icon">💻</span><span class="t-name">Frontend & Chat UI : HTML/JS Intégré</span></div>
+        <span class="t-badge" style="color:#f59e0b;background:#fef3c7;">SÉLECTIONNÉ</span>
+      </div>
+      <p class="t-desc">Garantie d'une interface robuste pour la gestion KPI et l'intégration Chatbot.</p>
+      <ul class="t-list">
+        <li><strong>Vanilla JS (sans React/Vue)</strong> : Nous avons opté pour du HTML/JS/CSS natif pour réduire significativement le surcoût de déploiement et maximiser la rapidité de création des Dashboards interactifs (Chart.js).</li>
+        <li><strong>Chatbot Web Intégré</strong> : Plutôt que de déléguer à Telegram, le chat Text-to-SQL est intégré directement dans le Dashboard (Panneau furtif <em>Cmd+K</em>) pour qu'un agent puisse poser des questions tout en analysant ses données CRUD.</li>
+      </ul>
+    </div>
+
+    <!-- BACKEND -->
+    <div class="tech-item">
+      <div class="t-head">
+        <div class="t-left"><span class="t-icon">⚡</span><span class="t-name">Backend : FastAPI (Python)</span></div>
+        <span class="t-badge" style="color:#3b82f6;background:#dbeafe;">SÉLECTIONNÉ</span>
+      </div>
+      <p class="t-desc">FastAPI a été privilégié catégoriquement face à d'autres alternatives comme Node.js.</p>
+      <ul class="t-list">
+        <li><strong>Mode Asynchrone</strong> : Absolument nécessaire pour ne pas bloquer les requêtes MySQL pendant que l'API interroge le LLM.</li>
+        <li><strong>Écosystème IA</strong> : Python offre les bibliothèques d'orchestration IA les plus matures et performantes du marché.</li>
+      </ul>
+    </div>
+
+    <!-- DB -->
+    <div class="tech-item">
+      <div class="t-head">
+        <div class="t-left"><span class="t-icon">🐬</span><span class="t-name">Base de données : MySQL 8.x</span></div>
+        <span class="t-badge" style="color:#10b981;background:#d1fae5;">SÉLECTIONNÉ</span>
+      </div>
+      <p class="t-desc">Implémentation stricte d'un modèle relationnel complet et intègre.</p>
+      <ul class="t-list">
+        <li><strong>Schéma enrichi</strong> : Intégration stricte des tables. Ajout de contraintes métier poussées (gestion anti-fatigue 8H, maintenance prédictive).</li>
+        <li><strong>Text-to-SQL sécurisé</strong> : Seuls les appels d'extraction ('SELECT') sont tolérés via un routage strict côté Backend. Si l'IA génère un 'DELETE', l'API le rejette.</li>
+      </ul>
+    </div>
+
+    <!-- LLM -->
+    <div class="tech-item">
+      <div class="t-head">
+        <div class="t-left"><span class="t-icon">🤖</span><span class="t-name">Intelligence IA : Groq Cloud API</span></div>
+        <span class="t-badge" style="color:#8b5cf6;background:#f3e8ff;">SÉLECTIONNÉ</span>
+      </div>
+      <p class="t-desc">Service LLM ultra-rapide basé sur le cloud, privilégié face à OpenAI ou à des modèles locaux.</p>
+      <ul class="t-list">
+        <li><strong>Modèle LLaMA-3.3-70b-versatile</strong> : Modèle open-source de Meta, hébergé sur Groq. Génère le SQL (text-to-SQL) ET la réponse en langage naturel. Température 0.0 pour la génération SQL (déterministe) et 0.4 pour la réponse narrative.</li>
+        <li><strong>Budget &amp; Gratuité</strong> : Groq propose une API gratuite, là où OpenAI impose des coûts récurrents par token, bloquants à notre échelle.</li>
+        <li><strong>Librairie Python <code style="font-size:9pt">groq</code></strong> : Le code utilise directement le SDK Groq (import Groq). ⚠️ Incompatible API avec le SDK openai — le schéma prompt est injecté en system message.</li>
+        <li><strong>Modèles Locaux (Ollama LLaMA3) écartés</strong> : Déployer un LLM lourd exige une puissance GPU qui explose drastiquement les coûts matériels du déploiement.</li>
+      </ul>
+    </div>
+    
+    <!-- DEPLOYMENT -->
+    <div class="tech-item" style="grid-column: span 2;">
+      <div class="t-head">
+        <div class="t-left"><span class="t-icon">☁️</span><span class="t-name">Déploiement : Render (Backend) + AlwaysData (MySQL)</span></div>
+        <span class="t-badge" style="color:#10b981;background:#d1fae5;">EN PRODUCTION</span>
+      </div>
+      <p class="t-desc">Architecture cloud hybride : Backend Python hébergé sur Render, base de données MySQL hébergée sur AlwaysData.</p>
+      <ul class="t-list">
+        <li><strong>Render (Backend FastAPI)</strong> : Héberge l'API Python. Déploiement automatique depuis GitHub (CI/CD). HTTPS géré automatiquement. Plan gratuit avec 750h/mois. Redéploiement automatique à chaque <code style="font-size:9pt">git push</code> sur <code style="font-size:9pt">main</code>.</li>
+        <li><strong>AlwaysData (MySQL 8.0)</strong> : Héberge la base de données <code style="font-size:9pt">informaticienc_transpobot</code>. Plan gratuit avec 100 Mo. Connexion sécurisée SSL depuis Render. Les credentials sont stockés dans les variables d'environnement Render (jamais dans le code).</li>
+        <li><strong>Serveur VPS classique écarté</strong> : Bien qu'un VPS offre le contrôle total, il nécessite des compétences SysAdmin (FireWall, Nginx, Certificats SSL auto-renouvelés) qui détournent du développement. Render gère le HTTPS et le déploiement de manière automatisée (PaaS).</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

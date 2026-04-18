@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TranspoBot — Activation de Compte</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0f1c;
+            color: #e0e6ed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Matrix rain background */
+        .matrix-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; opacity: 0.06;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px, rgba(0,255,200,.03) 2px, rgba(0,255,200,.03) 4px
+            );
+        }
+
+        .container {
+            position: relative; z-index: 1;
+            max-width: 480px; width: 100%;
+            background: rgba(17, 24, 39, 0.95);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 200, 0.15);
+            padding: 48px 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo i {
+            font-size: 48px;
+            color: #00ffc8;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+        .logo p {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* States */
+        .state { display: none; }
+        .state.active { display: block; }
+
+        /* Form */
+        .field { margin-bottom: 20px; }
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .field input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: border 0.3s;
+        }
+        .field input:focus {
+            outline: none;
+            border-color: #00ffc8;
+            box-shadow: 0 0 0 3px rgba(0, 255, 200, 0.1);
+        }
+
+        /* Password strength */
+        .password-rules {
+            margin: 12px 0 20px;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+        .rule {
+            font-size: 12px;
+            color: #64748b;
+            padding: 3px 0;
+            transition: color 0.3s;
+        }
+        .rule.valid { color: #00ffc8; }
+        .rule i { width: 16px; margin-right: 6px; }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffc8, #00b894);
+            color: #0a0f1c;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 200, 0.3);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Messages */
+        .msg-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .msg-success {
+            text-align: center;
+        }
+        .msg-success i {
+            font-size: 64px;
+            color: #00ffc8;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .msg-success h2 {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .msg-success p {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .msg-success .btn {
+            text-decoration: none;
+            display: inline-block;
+            width: auto;
+            padding: 14px 32px;
+        }
+
+        /* Invalid token state */
+        .msg-invalid {
+            text-align: center;
+        }
+        .msg-invalid i {
+            font-size: 64px;
+            color: #ef4444;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .msg-invalid h2 {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .msg-invalid p {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* Toggle password visibility */
+        .password-wrapper {
+            position: relative;
+        }
+        .password-wrapper input {
+            padding-right: 48px;
+        }
+        .toggle-pwd {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg"></div>
+
+    <div class="container">
+        <div class="logo">
+            <i class="fa fa-shield-halved"></i>
+            <h1>TRANSPOBOT</h1>
+            <p>Activation de compte</p>
+        </div>
+
+        <!-- STATE: Loading -->
+        <div id="state-loading" class="state active" style="text-align:center; padding: 40px 0;">
+            <i class="fa fa-circle-notch fa-spin" style="font-size:32px; color:#00ffc8;"></i>
+            <p style="margin-top:16px; color:#94a3b8;">Vérification du lien en cours…</p>
+        </div>
+
+        <!-- STATE: Form -->
+        <div id="state-form" class="state">
+            <p style="font-size:14px; color:#94a3b8; margin-bottom:24px; text-align:center;">
+                Définissez votre mot de passe personnel pour accéder à TranspoBot.
+            </p>
+
+            <div id="form-error" class="msg-error"></div>
+
+            <div class="field">
+                <label>Mot de passe</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Choisissez un mot de passe sécurisé">
+                    <button type="button" class="toggle-pwd" onclick="togglePwd('password')"><i class="fa fa-eye"></i></button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Confirmer le mot de passe</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password-confirm" placeholder="Retapez votre mot de passe">
+                    <button type="button" class="toggle-pwd" onclick="togglePwd('password-confirm')"><i class="fa fa-eye"></i></button>
+                </div>
+            </div>
+
+            <div class="password-rules">
+                <div class="rule" id="rule-length"><i class="fa fa-circle"></i> Minimum 8 caractères</div>
+                <div class="rule" id="rule-upper"><i class="fa fa-circle"></i> Au moins 1 majuscule</div>
+                <div class="rule" id="rule-number"><i class="fa fa-circle"></i> Au moins 1 chiffre</div>
+                <div class="rule" id="rule-special"><i class="fa fa-circle"></i> Au moins 1 caractère spécial (!@#$...)</div>
+                <div class="rule" id="rule-match"><i class="fa fa-circle"></i> Les deux mots de passe correspondent</div>
+            </div>
+
+            <button class="btn btn-primary" id="btn-activate" onclick="doActivate()" disabled>
+                <i class="fa fa-check-circle"></i>&nbsp; Activer mon compte
+            </button>
+        </div>
+
+        <!-- STATE: Success -->
+        <div id="state-success" class="state">
+            <div class="msg-success">
+                <i class="fa fa-check-circle"></i>
+                <h2>Compte activé !</h2>
+                <p>Votre mot de passe a été défini avec succès.<br>Vous pouvez maintenant vous connecter avec votre email et votre nouveau mot de passe.</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="fa fa-arrow-right"></i>&nbsp; Aller à la page de connexion
+                </a>
+            </div>
+        </div>
+
+        <!-- STATE: Invalid Token -->
+        <div id="state-invalid" class="state">
+            <div class="msg-invalid">
+                <i class="fa fa-times-circle"></i>
+                <h2>Lien invalide</h2>
+                <p id="invalid-message">Ce lien d'activation est invalide ou a expiré.<br>Contactez votre administrateur pour recevoir un nouveau lien.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin;
+        const params = new URLSearchParams(window.location.search);
+        const TOKEN = params.get('token');
+
+        // ─── Init ───
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!TOKEN) {
+                showState('invalid');
+                document.getElementById('invalid-message').textContent = 'Aucun token fourni dans le lien.';
+                return;
+            }
+            // Show the form directly — we validate the token server-side on submit
+            showState('form');
+
+            // Live password validation
+            document.getElementById('password').addEventListener('input', checkRules);
+            document.getElementById('password-confirm').addEventListener('input', checkRules);
+
+            // Enter key
+            document.getElementById('password-confirm').addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !document.getElementById('btn-activate').disabled) doActivate();
+            });
+        });
+
+        function showState(name) {
+            document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+            document.getElementById(`state-${name}`).classList.add('active');
+        }
+
+        function togglePwd(id) {
+            const input = document.getElementById(id);
+            const icon = input.nextElementSibling.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function checkRules() {
+            const pwd = document.getElementById('password').value;
+            const confirm = document.getElementById('password-confirm').value;
+
+            const rules = {
+                'rule-length':  pwd.length >= 8,
+                'rule-upper':   /[A-Z]/.test(pwd),
+                'rule-number':  /[0-9]/.test(pwd),
+                'rule-special': /[!@#$%^&*(),.?":{}|<>]/.test(pwd),
+                'rule-match':   pwd.length > 0 && pwd === confirm
+            };
+
+            let allValid = true;
+            for (const [id, valid] of Object.entries(rules)) {
+                const el = document.getElementById(id);
+                const icon = el.querySelector('i');
+                if (valid) {
+                    el.classList.add('valid');
+                    icon.classList.replace('fa-circle', 'fa-check-circle');
+                } else {
+                    el.classList.remove('valid');
+                    icon.classList.replace('fa-check-circle', 'fa-circle');
+                    allValid = false;
+                }
+            }
+
+            document.getElementById('btn-activate').disabled = !allValid;
+        }
+
+        async function doActivate() {
+            const pwd = document.getElementById('password').value;
+            const confirm = document.getElementById('password-confirm').value;
+            const btn = document.getElementById('btn-activate');
+            const errEl = document.getElementById('form-error');
+            errEl.style.display = 'none';
+
+            if (pwd !== confirm) {
+                errEl.textContent = 'Les deux mots de passe ne correspondent pas.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i>&nbsp; Activation en cours…';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API}/api/auth/activate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: TOKEN, password: pwd })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    if (res.status === 400) {
+                        // Token invalide ou expiré
+                        document.getElementById('invalid-message').textContent = data.detail;
+                        showState('invalid');
+                    } else {
+                        errEl.textContent = data.detail || 'Erreur lors de l\'activation.';
+                        errEl.style.display = 'block';
+                    }
+                    return;
+                }
+
+                showState('success');
+            } catch (e) {
+                errEl.textContent = 'Impossible de contacter le serveur.';
+                errEl.style.display = 'block';
+            } finally {
+                btn.innerHTML = '<i class="fa fa-check-circle"></i>&nbsp; Activer mon compte';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

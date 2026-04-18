@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TranspoBot — Super Admin SOC</title>
+    <meta name="description" content="Interface de supervision sécurisée TranspoBot — Accès Super Administrateur uniquement.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-deep: #030812;
+            --bg-card: rgba(6, 18, 38, 0.85);
+            --bg-card-hover: rgba(10, 28, 58, 0.9);
+            --accent-cyan: #00f5ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff2855;
+            --accent-orange: #ff8c00;
+            --accent-purple: #a855f7;
+            --accent-blue: #3b82f6;
+            --text-primary: #e2e8f0;
+            --text-muted: #64748b;
+            --border: rgba(0, 245, 255, 0.15);
+            --glow-cyan: 0 0 20px rgba(0, 245, 255, 0.4);
+            --glow-red: 0 0 20px rgba(255, 40, 85, 0.5);
+            --glow-green: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ─── CANVAS MATRIX BACKGROUND ─── */
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            opacity: 0.035;   /* Réduit pour ne pas gêner la lisibilité */
+            pointer-events: none;
+        }
+
+        /* ─── LOGIN SCREEN ─── */
+        #login-screen {
+            position: fixed; inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, rgba(0,30,60,0.95) 0%, rgba(3,8,18,0.99) 100%);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        #login-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.05);
+        }
+        #login-screen.gone { display: none !important; }
+
+        .login-box {
+            background: rgba(6, 18, 38, 0.9);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 20px;
+            padding: 50px 60px;
+            width: 420px;
+            text-align: center;
+            box-shadow: var(--glow-cyan), inset 0 1px 0 rgba(0,245,255,0.1);
+            animation: loginPulse 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-box::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, var(--accent-cyan), transparent, var(--accent-purple), transparent, var(--accent-cyan));
+            border-radius: 22px;
+            z-index: -1;
+            animation: borderRotate 4s linear infinite;
+            background-size: 400% 400%;
+        }
+        
+        @keyframes borderRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes loginPulse {
+            0%, 100% { box-shadow: var(--glow-cyan), inset 0 1px 0 rgba(0,245,255,0.1); }
+            50% { box-shadow: 0 0 40px rgba(0, 245, 255, 0.6), inset 0 1px 0 rgba(0,245,255,0.2); }
+        }
+
+        .login-shield {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            display: block;
+            animation: shieldSpin 8s linear infinite;
+            filter: drop-shadow(0 0 10px var(--accent-cyan));
+        }
+        @keyframes shieldSpin {
+            0%, 100% { transform: rotate(-5deg); filter: drop-shadow(0 0 10px var(--accent-cyan)); }
+            50% { transform: rotate(5deg); filter: drop-shadow(0 0 20px var(--accent-cyan)); }
+        }
+
+        .login-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--accent-cyan);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .login-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 36px;
+        }
+
+        .login-field {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .login-field i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+        }
+        .login-field input {
+            width: 100%;
+            background: rgba(0, 245, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 14px 14px 44px;
+            color: var(--text-primary);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .login-field input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+            background: rgba(0, 245, 255, 0.08);
+        }
+        .login-field input::placeholder { color: var(--text-muted); }
+
+        #login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none;
+            border-radius: 10px;
+            color: var(--bg-deep);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        #login-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.4s;
+        }
+        #login-btn:hover::after { transform: translateX(100%); }
+        #login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,245,255,0.4); }
+        #login-btn:active { transform: translateY(0); }
+
+        #login-error {
+            margin-top: 16px;
+            padding: 10px;
+            background: rgba(255, 40, 85, 0.15);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            color: var(--accent-red);
+            font-size: 0.82rem;
+            display: none;
+            animation: shakeFade 0.4s ease;
+        }
+        @keyframes shakeFade {
+            0% { transform: translateX(-6px); opacity: 0; }
+            25% { transform: translateX(6px); }
+            50% { transform: translateX(-3px); }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ─── MAIN DASHBOARD ─── */
+        #dashboard {
+            position: relative;
+            z-index: 1;
+            display: none;
+            min-height: 100vh;
+            flex-direction: column;
+            animation: fadeInDash 0.5s ease;
+        }
+        @keyframes fadeInDash {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        #dashboard.visible { display: flex; }
+
+        /* Fix select dropdown contrast */
+        .soc-select option {
+            background: #0d1b2a;
+            color: var(--text-primary);
+        }
+
+        /* HEADER */
+        .soc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            background: rgba(3, 8, 18, 0.9);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .soc-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .soc-logo-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--bg-deep);
+        }
+        .soc-logo-text { font-size: 1.1rem; font-weight: 900; color: var(--accent-cyan); letter-spacing: 2px; text-transform: uppercase; }
+        .soc-logo-sub { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase; }
+
+        .soc-header-right { display: flex; align-items: center; gap: 20px; }
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--accent-green);
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 1px;
+        }
+        .live-dot {
+            width: 8px; height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: livePulse 1.2s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.6); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+        }
+        #current-time {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            letter-spacing: 2px;
+        }
+        #logout-btn {
+            background: transparent;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        #logout-btn:hover { background: rgba(255,40,85,0.15); box-shadow: var(--glow-red); }
+
+        /* NAV TABS */
+        .soc-nav {
+            display: flex;
+            gap: 4px;
+            padding: 16px 32px 0;
+            background: rgba(3, 8, 18, 0.5);
+            border-bottom: 1px solid var(--border);
+        }
+        .soc-tab {
+            padding: 10px 22px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .soc-tab:hover { color: var(--text-primary); }
+        .soc-tab.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+
+        /* CONTENT */
+        .soc-content { padding: 28px 32px; flex: 1; }
+        .soc-page { display: none; animation: fadeInUp 0.4s ease; }
+        .soc-page.active { display: block; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* STAT CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s ease;
+            cursor: default;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--card-color, var(--accent-cyan)), transparent);
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--card-color, var(--accent-cyan));
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .stat-card-icon {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            background: rgba(0, 245, 255, 0.1);
+            color: var(--card-color, var(--accent-cyan));
+        }
+        .stat-card-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            background: rgba(0,255,136,0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(0,255,136,0.3);
+        }
+        .stat-card-value {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 6px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .stat-card-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* TABLES */
+        .soc-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .soc-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .soc-card-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+        .soc-card-title i { color: var(--accent-cyan); }
+        .soc-card-count {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: rgba(0,245,255,0.08);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .soc-table-wrap { overflow-x: auto; }
+        .soc-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+        .soc-table th {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,245,255,0.03);
+        }
+        .soc-table td {
+            padding: 13px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+        .soc-table tr:hover td { background: rgba(0,245,255,0.04); }
+        .soc-table tr:last-child td { border-bottom: none; }
+
+        /* BADGES BY TYPE */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .badge.danger { background: rgba(255,40,85,0.15); color: var(--accent-red); border: 1px solid rgba(255,40,85,0.3); }
+        .badge.warning { background: rgba(255,140,0,0.15); color: var(--accent-orange); border: 1px solid rgba(255,140,0,0.3); }
+        .badge.success { background: rgba(0,255,136,0.1); color: var(--accent-green); border: 1px solid rgba(0,255,136,0.25); }
+        .badge.info { background: rgba(0,245,255,0.1); color: var(--accent-cyan); border: 1px solid rgba(0,245,255,0.25); }
+        .badge.purple { background: rgba(168,85,247,0.15); color: var(--accent-purple); border: 1px solid rgba(168,85,247,0.3); }
+
+        /* SEARCH & FILTERS */
+        .soc-filters {
+            display: flex;
+            gap: 12px;
+            padding: 14px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+        }
+        .soc-search {
+            flex: 1;
+            position: relative;
+        }
+        .soc-search i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .soc-search input, .soc-select {
+            background: rgba(0,245,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 12px 9px 36px;
+            color: var(--text-primary);
+            font-size: 0.82rem;
+            outline: none;
+            width: 100%;
+            transition: all 0.3s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .soc-select { padding-left: 12px; cursor: pointer; }
+        .soc-search input:focus { border-color: var(--accent-cyan); background: rgba(0,245,255,0.07); }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.3; }
+
+        /* LOADING SPINNER */
+        .soc-loader {
+            text-align: center;
+            padding: 50px;
+        }
+        .soc-loader-ring {
+            width: 48px; height: 48px;
+            border: 3px solid rgba(0,245,255,0.2);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* REFRESH BUTTON */
+        .soc-refresh {
+            background: rgba(0,245,255,0.08);
+            border: 1px solid var(--border);
+            color: var(--accent-cyan);
+            padding: 7px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+        .soc-refresh:hover { background: rgba(0,245,255,0.15); transform: translateY(-1px); }
+        .soc-refresh.spinning i { animation: spin 0.6s linear infinite; }
+
+        /* SECURITY EVENT TYPES */
+        .event-type-pill {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .section-title h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .section-title-bar {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        /* AI QUERY CARD */
+        .ai-query-text {
+            max-width: 280px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-primary);
+        }
+        .sql-snippet {
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--accent-cyan);
+            font-size: 0.75rem;
+        }
+        .response-time-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .time-bar-fill {
+            height: 4px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+            min-width: 4px;
+            max-width: 100px;
+            transition: width 0.5s ease;
+        }
+
+        /* DONUT CHART APPROXIMATION */
+        .mini-donut { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .mini-donut-item {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.75rem; color: var(--text-muted);
+        }
+        .mini-donut-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        /* SCROLL */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,245,255,0.4); }
+
+        /* ACTION BUTTONS (Gestion des Accès) */
+        .soc-action-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .soc-action-btn:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-1px);
+        }
+        .badge.warning {
+            background: rgba(255, 140, 0, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+
+<!-- ─── LOGIN SCREEN ─── -->
+<div id="login-screen">
+    <div class="login-box">
+        <span class="login-shield">🛡️</span>
+        <div class="login-title">TranspoBot SOC</div>
+        <div class="login-sub">Accès restreint — Super Administrateur</div>
+        <div class="login-field">
+            <i class="fa fa-user"></i>
+            <input type="text" id="sa-username" placeholder="Identifiant Super Admin" autocomplete="off">
+        </div>
+        <div class="login-field">
+            <i class="fa fa-lock"></i>
+            <input type="password" id="sa-password" placeholder="Mot de passe" autocomplete="off">
+        </div>
+        <button id="login-btn" onclick="doSuperLogin()">
+            <i class="fa fa-shield-halved"></i>&nbsp; Accéder au SOC
+        </button>
+        <div id="login-error"></div>
+    </div>
+</div>
+
+<!-- ─── DASHBOARD ─── -->
+<div id="dashboard">
+    <header class="soc-header">
+        <div class="soc-logo">
+            <div class="soc-logo-icon"><i class="fa fa-shield-halved"></i></div>
+            <div>
+                <div class="soc-logo-text">TranspoBot SOC</div>
+                <div class="soc-logo-sub">Security Operations Center</div>
+            </div>
+        </div>
+        <div class="soc-header-right">
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                SYSTÈME ACTIF
+            </div>
+            <span id="refresh-countdown" style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);letter-spacing:1px"></span>
+            <div id="current-time">--:--:--</div>
+            <button id="logout-btn" onclick="doLogout()">
+                <i class="fa fa-right-from-bracket"></i> Déconnexion
+            </button>
+        </div>
+    </header>
+
+    <nav class="soc-nav">
+        <button class="soc-tab active" onclick="switchTab('overview')" id="tab-overview">
+            <i class="fa fa-gauge-high"></i> Vue d'ensemble
+        </button>
+        <button class="soc-tab" onclick="switchTab('security')" id="tab-security">
+            <i class="fa fa-triangle-exclamation"></i> Journal Sécurité
+        </button>
+        <button class="soc-tab" onclick="switchTab('ai-logs')" id="tab-ai-logs">
+            <i class="fa fa-robot"></i> Logs IA
+        </button>
+        <button class="soc-tab" onclick="switchTab('sessions')" id="tab-sessions">
+            <i class="fa fa-users"></i> Sessions Utilisateurs
+        </button>
+        <button class="soc-tab" onclick="switchTab('accounts')" id="tab-accounts">
+            <i class="fa fa-user-gear"></i> Gestion des Accès
+        </button>
+    </nav>
+
+    <div class="soc-content">
+        <!-- OVERVIEW -->
+        <div class="soc-page active" id="page-overview">
+            <div class="section-title">
+                <h2>Tableau de Bord Système</h2>
+                <div class="section-title-bar"></div>
+                <button class="soc-refresh" onclick="loadStats()" id="refresh-stats">
+                    <i class="fa fa-arrows-rotate"></i> Actualiser
+                </button>
+            </div>
+            <div class="stats-grid" id="stats-grid">
+                <div class="soc-loader"><div class="soc-loader-ring"></div></div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                <div class="soc-card" id="breakdown-trajets" style="display:none">
+                    <div class="soc-card-header">
+                        <div class="soc-card-title"><i class="fa fa-route"></i> Répartition des Trajets</div>
+                    </div>
+                    <div style="padding:20px" id="trajets-breakdown"></div>
+                </div>
+                <div class="soc-card" id="breakdown-vehicules" style="display:none">
+                    <div class="soc-card-header">
+                        <div class="soc-card-title"><i class="fa fa-bus"></i> Parc Véhicules</div>
+                    </div>
+                    <div style="padding:20px" id="vehicules-breakdown"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECURITY LOG -->
+        <div class="soc-page" id="page-security">
+            <div class="soc-card">
+                <div class="soc-card-header">
+                    <div class="soc-card-title"><i class="fa fa-shield-halved"></i> Journal de Sécurité</div>
+                    <div style="display:flex;gap:10px;align-items:center">
+                        <span class="soc-card-count" id="sec-log-count">0 événements</span>
+                        <button class="soc-refresh" onclick="loadSecurityLog()" id="refresh-sec">
+                            <i class="fa fa-arrows-rotate"></i> Actualiser
+                        </button>
+                    </div>
+                </div>
+                <div class="soc-filters">
+                    <div class="soc-search">
+                        <i class="fa fa-magnifying-glass"></i>
+                        <input type="text" id="sec-filter" placeholder="Filtrer par IP, type, détail…" oninput="filterSecLog()">
+                    </div>
+                    <select class="soc-select" id="sec-type-filter" onchange="filterSecLog()" style="width:220px">
+                        <option value="">Tous les types</option>
+                        <option value="USER_LOGIN">✅ Connexion gestionnaire</option>
+                        <option value="FAILED_LOGIN">Connexion échouée</option>
+                        <option value="BRUTE_FORCE_BLOCKED">Brute Force bloqué</option>
+                        <option value="SUPERADMIN">Super Admin</option>
+                        <option value="JWT_EXPIRED">Token expiré</option>
+                        <option value="JWT_INVALID">Token invalide</option>
+                        <option value="RBAC_DENIED">Accès refusé (rôle)</option>
+                        <option value="SQL_INJECTION_ATTEMPT">Injection SQL</option>
+                        <option value="AI_WRITE_ATTEMPT">⚠️ Tentative modification IA</option>
+                        <option value="DATA_LEAK_PREVENTED">Fuite de données évitée</option>
+                        <option value="BLOCKED_QUERY">Requête bloquée</option>
+                    </select>
+                </div>
+                <div class="soc-table-wrap">
+                    <table class="soc-table">
+                        <thead>
+                            <tr>
+                                <th>Horodatage</th>
+                                <th>Adresse IP</th>
+                                <th>Localisation</th>
+                                <th>Type d'Événement</th>
+                                <th>Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sec-log-body">
+                            <tr><td colspan="4"><div class="soc-loader"><div class="soc-loader-ring"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI LOGS -->
+        <div class="soc-page" id="page-ai-logs">
+            <div class="soc-card">
+                <div class="soc-card-header">
+                    <div class="soc-card-title"><i class="fa fa-robot"></i> Requêtes IA — Historique</div>
+                    <div style="display:flex;gap:10px;align-items:center">
+                        <span class="soc-card-count" id="ai-log-count">0 requêtes</span>
+                        <button class="soc-refresh" onclick="loadAiLogs()" id="refresh-ai">
+                            <i class="fa fa-arrows-rotate"></i> Actualiser
+                        </button>
+                    </div>
+                </div>
+                <div class="soc-filters">
+                    <div class="soc-search">
+                        <i class="fa fa-magnifying-glass"></i>
+                        <input type="text" id="ai-filter" placeholder="Filtrer par gestionnaire, question, SQL…" oninput="filterAiLogs()">
+                    </div>
+                </div>
+                <div class="soc-table-wrap">
+                    <table class="soc-table">
+                        <thead>
+                            <tr>
+                                <th>Gestionnaire</th>
+                                <th>Question posée</th>
+                                <th>SQL généré</th>
+                                <th>Temps</th>
+                                <th>Date / Heure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ai-log-body">
+                            <tr><td colspan="5"><div class="soc-loader"><div class="soc-loader-ring"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SESSIONS -->
+        <div class="soc-page" id="page-sessions">
+            <div class="soc-card">
+                <div class="soc-card-header">
+                    <div class="soc-card-title"><i class="fa fa-users"></i> Comptes Gestionnaires</div>
+                    <div style="display:flex;gap:10px;align-items:center">
+                        <button class="soc-refresh" onclick="loadSessions()" id="refresh-sess">
+                            <i class="fa fa-arrows-rotate"></i> Actualiser
+                        </button>
+                    </div>
+                </div>
+                <div class="soc-table-wrap">
+                    <table class="soc-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Statut</th>
+                                <th>Dernière connexion</th>
+                                <th>Dernière activité IA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessions-body">
+                            <tr><td colspan="6"><div class="soc-loader"><div class="soc-loader-ring"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GESTION DES ACCÈS -->
+        <div class="soc-page" id="page-accounts">
+            <div class="section-title">
+                <h2><i class="fa fa-user-gear"></i> Gestion des Comptes</h2>
+                <div class="section-title-bar"></div>
+                <button class="soc-refresh" onclick="loadAccounts()">
+                    <i class="fa fa-arrows-rotate"></i> Actualiser
+                </button>
+            </div>
+
+            <!-- Formulaire de création -->
+            <div class="soc-card" style="margin-bottom:24px">
+                <div class="soc-card-header">
+                    <div class="soc-card-title"><i class="fa fa-user-plus"></i> Créer un nouveau compte</div>
+                </div>
+                <div style="padding:20px">
+                    <div id="create-msg" style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:0.85rem"></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:14px;align-items:end">
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nom complet</label>
+                            <input type="text" id="new-nom" placeholder="Ex: Mamadou DIOP" style="width:100%;padding:10px 14px;background:rgba(0,245,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Email</label>
+                            <input type="email" id="new-email" placeholder="prenom.nom@esp.sn" style="width:100%;padding:10px 14px;background:rgba(0,245,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Rôle</label>
+                            <select id="new-role" class="soc-select" style="padding:10px 14px;background:rgba(0,245,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none;min-width:140px">
+                                <option value="gestionnaire">Gestionnaire</option>
+                                <option value="lecteur">Lecteur</option>
+                            </select>
+                        </div>
+                        <button onclick="createAccount()" id="btn-create" style="padding:10px 22px;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-green));border:none;border-radius:8px;color:var(--bg-deep);font-weight:700;cursor:pointer;font-size:0.85rem;white-space:nowrap;height:42px">
+                            <i class="fa fa-paper-plane"></i> Créer et envoyer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des comptes -->
+            <div class="soc-card">
+                <div class="soc-card-header">
+                    <div class="soc-card-title"><i class="fa fa-list-check"></i> Comptes existants</div>
+                    <span class="total-badge" id="accounts-total">0</span>
+                </div>
+                <div class="soc-table-wrap">
+                    <table class="soc-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accounts-body">
+                            <tr><td colspan="5"><div class="soc-loader"><div class="soc-loader-ring"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── GLOBAL STATE ───
+const API = (window.location.hostname === '' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:8000'
+    : window.location.origin;
+
+let SA_TOKEN = sessionStorage.getItem('sa_token') || null;
+let allSecLogs = [];
+let allAiLogs = [];
+let clockInterval = null;
+let autoRefreshInterval = null;
+const AUTO_REFRESH_SECONDS = 20;  // Actualisation automatique toutes les 20s
+let nextRefreshIn = AUTO_REFRESH_SECONDS;
+
+// ─── MATRIX CANVAS ANIMATION ───
+(function initMatrix() {
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    let cols, drops;
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        cols = Math.floor(canvas.width / 18);
+        drops = Array(cols).fill(1);
+    }
+
+    function draw() {
+        ctx.fillStyle = 'rgba(3, 8, 18, 0.07)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00f5ff';
+        ctx.font = '13px Share Tech Mono';
+
+        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+        drops.forEach((y, i) => {
+            const char = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(char, i * 18, y * 18);
+            if (y * 18 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    setInterval(draw, 70);
+})();
+
+// ─── CLOCK ───
+function startClock() {
+    function tick() {
+        const now = new Date();
+        document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', {hour12: false});
+    }
+    tick();
+    clockInterval = setInterval(tick, 1000);
+}
+
+// ─── AUTO-REFRESH LIVE ───
+function startAutoRefresh() {
+    nextRefreshIn = AUTO_REFRESH_SECONDS;
+    updateRefreshCounter();
+    autoRefreshInterval = setInterval(() => {
+        nextRefreshIn--;
+        updateRefreshCounter();
+        if (nextRefreshIn <= 0) {
+            // Recharge silencieuse des données live
+            loadSecurityLog();
+            loadSessions();
+            loadAccounts();
+            loadStats();
+            nextRefreshIn = AUTO_REFRESH_SECONDS;
+        }
+    }, 1000);
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) { clearInterval(autoRefreshInterval); autoRefreshInterval = null; }
+}
+
+function updateRefreshCounter() {
+    const el = document.getElementById('refresh-countdown');
+    if (el) el.textContent = `Actualisation dans ${nextRefreshIn}s`;
+}
+
+// ─── CHECK EXISTING SESSION ───
+window.addEventListener('DOMContentLoaded', () => {
+    if (SA_TOKEN) {
+        showDashboard(true); // true = restored session
+    }
+    document.getElementById('sa-password').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doSuperLogin();
+    });
+});
+
+// ─── LOGIN ───
+async function doSuperLogin() {
+    const username = document.getElementById('sa-username').value.trim();
+    const password = document.getElementById('sa-password').value;
+    const btnEl = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+
+    if (!username || !password) {
+        showLoginError('Veuillez renseigner vos identifiants.');
+        return;
+    }
+
+    btnEl.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i>&nbsp; Authentification…';
+    btnEl.disabled = true;
+
+    try {
+        const res = await fetch(`${API}/api/superadmin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            showLoginError(data.detail || 'Identifiants incorrects.');
+            return;
+        }
+
+        SA_TOKEN = data.token;
+        sessionStorage.setItem('sa_token', SA_TOKEN);
+        showDashboard();
+    } catch (e) {
+        showLoginError('Impossible de contacter le serveur API.');
+    } finally {
+        btnEl.innerHTML = '<i class="fa fa-shield-halved"></i>&nbsp; Accéder au SOC';
+        btnEl.disabled = false;
+    }
+}
+
+function showLoginError(msg) {
+    const el = document.getElementById('login-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function showDashboard(isRestore = false) {
+    const loginEl = document.getElementById('login-screen');
+    
+    if (isRestore) {
+        // Au rafraîchissement : masquer instantanément sans animation
+        loginEl.style.transition = 'none';
+        loginEl.classList.add('hidden', 'gone');
+        setTimeout(() => { loginEl.style.transition = ''; }, 50);
+    } else {
+        // En pleine session : animation avec fondu
+        loginEl.classList.add('hidden');
+        setTimeout(() => loginEl.classList.add('gone'), 850);
+    }
+    
+    const dash = document.getElementById('dashboard');
+    dash.classList.add('visible');
+    startClock();
+    startAutoRefresh();
+    loadStats();
+    loadSecurityLog();
+    loadAiLogs();
+    loadSessions();
+    loadAccounts();
+}
+
+function doLogout() {
+    SA_TOKEN = null;
+    sessionStorage.removeItem('sa_token');
+    clearInterval(clockInterval);
+    stopAutoRefresh();
+    
+    const dash = document.getElementById('dashboard');
+    dash.classList.remove('visible');
+    
+    const login = document.getElementById('login-screen');
+    login.classList.remove('gone'); // Retire le display:none
+    
+    // Léger délai pour permettre au navigateur d'appliquer le display:block avant l'animation
+    requestAnimationFrame(() => {
+        login.classList.remove('hidden');
+    });
+    
+    document.getElementById('sa-username').value = '';
+    document.getElementById('sa-password').value = '';
+}
+
+// ─── TAB NAVIGATION ───
+function switchTab(tab) {
+    document.querySelectorAll('.soc-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.soc-page').forEach(p => p.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById(`page-${tab}`).classList.add('active');
+}
+
+// ─── API HELPER ───
+async function apiGet(endpoint) {
+    const res = await fetch(`${API}/api/superadmin/${endpoint}`, {
+        headers: { 'Authorization': `Bearer ${SA_TOKEN}` }
+    });
+    if (res.status === 401) { doLogout(); return null; }
+    return res.json();
+}
+
+// ─── LOAD STATS ───
+async function loadStats() {
+    const btn = document.getElementById('refresh-stats');
+    btn.classList.add('spinning');
+    const data = await apiGet('stats');
+    btn.classList.remove('spinning');
+    if (!data) return;
+
+    const grid = document.getElementById('stats-grid');
+    grid.innerHTML = '';
+
+    const cards = [
+        { label: 'Utilisateurs', value: data.total_users, icon: 'fa-users', color: 'var(--accent-cyan)', badge: 'Actifs' },
+        { label: "Trajets aujourd'hui", value: data.trajets_today, icon: 'fa-route', color: 'var(--accent-green)', badge: "Aujourd'hui" },
+        { label: 'Incidents ouverts', value: data.incidents_ouverts, icon: 'fa-triangle-exclamation', color: 'var(--accent-orange)', badge: data.incidents_ouverts > 0 ? 'Attention' : 'OK' },
+        { label: 'Requêtes IA totales', value: data.total_ai_queries, icon: 'fa-robot', color: 'var(--accent-purple)', badge: 'Historique' },
+        { label: "IA aujourd'hui", value: data.ai_queries_today, icon: 'fa-brain', color: 'var(--accent-blue)', badge: "Aujourd'hui" },
+        { label: 'Temps moyen IA', value: data.avg_ai_response_ms > 0 ? `${data.avg_ai_response_ms}ms` : 'N/A', icon: 'fa-bolt', color: 'var(--accent-cyan)', badge: data.avg_ai_response_ms > 0 ? "Aujourd'hui" : 'Aucune requête' },
+        { label: 'Total Incidents', value: data.total_incidents, icon: 'fa-bug', color: 'var(--accent-red)', badge: 'Total' },
+    ];
+
+    cards.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'stat-card';
+        div.style.setProperty('--card-color', c.color);
+        div.innerHTML = `
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fa ${c.icon}"></i></div>
+                <span class="stat-card-badge" style="color:${c.color};border-color:${c.color}20;background:${c.color}12">${c.badge}</span>
+            </div>
+            <div class="stat-card-value">${c.value}</div>
+            <div class="stat-card-label">${c.label}</div>
+        `;
+        grid.appendChild(div);
+
+        // Animate value count-up
+        if (typeof c.value === 'number') {
+            let start = 0;
+            const target = c.value;
+            const el = div.querySelector('.stat-card-value');
+            const dur = 1000;
+            const step = Math.max(1, Math.round(target / 40));
+            const interval = setInterval(() => {
+                start = Math.min(start + step, target);
+                el.textContent = start;
+                if (start >= target) clearInterval(interval);
+            }, dur / 40);
+        }
+    });
+
+    // Breakdown charts
+    if (data.trajets_by_statut) {
+        const el = document.getElementById('trajets-breakdown');
+        const total = data.trajets_by_statut.reduce((s, x) => s + x.count, 0);
+        const colors = {planifie:'var(--accent-cyan)', en_cours:'var(--accent-orange)', termine:'var(--accent-green)', annule:'var(--accent-red)'};
+        el.innerHTML = data.trajets_by_statut.map(r => `
+            <div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">
+                    <span style="color:var(--text-muted)">${r.statut}</span>
+                    <span style="color:var(--text-primary);font-family:'Share Tech Mono',monospace">${r.count}</span>
+                </div>
+                <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+                    <div style="height:100%;width:${total > 0 ? (r.count/total*100).toFixed(1) : 0}%;background:${colors[r.statut]||'var(--accent-cyan)'};border-radius:3px;transition:width 1s ease"></div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('breakdown-trajets').style.display = 'block';
+    }
+
+    if (data.vehicules_by_statut) {
+        const el = document.getElementById('vehicules-breakdown');
+        const colors = {actif:'var(--accent-green)', maintenance:'var(--accent-orange)', hors_service:'var(--accent-red)'};
+        const total = data.vehicules_by_statut.reduce((s, x) => s + x.count, 0);
+        el.innerHTML = data.vehicules_by_statut.map(r => `
+            <div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">
+                    <span style="color:var(--text-muted)">${r.statut}</span>
+                    <span style="color:var(--text-primary);font-family:'Share Tech Mono',monospace">${r.count}</span>
+                </div>
+                <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+                    <div style="height:100%;width:${total > 0 ? (r.count/total*100).toFixed(1) : 0}%;background:${colors[r.statut]||'var(--accent-cyan)'};border-radius:3px;transition:width 1s ease"></div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('breakdown-vehicules').style.display = 'block';
+    }
+}
+
+// ─── SECURITY LOG ───
+async function loadSecurityLog() {
+    const btn = document.getElementById('refresh-sec');
+    btn.classList.add('spinning');
+    const data = await apiGet('security-log?lines=200');
+    btn.classList.remove('spinning');
+    if (!data) return;
+    allSecLogs = data.events || [];
+    document.getElementById('sec-log-count').textContent = `${data.total || 0} événements`;
+    renderSecLog(allSecLogs);
+}
+
+function getEventBadge(type) {
+    const map = {
+        FAILED_LOGIN:             { cls: 'warning', label: 'Connexion échouée',       icon: 'fa-user-xmark' },
+        BRUTE_FORCE_BLOCKED:      { cls: 'danger',  label: 'Brute Force !!!',         icon: 'fa-skull' },
+        SUPERADMIN_BRUTE_FORCE:   { cls: 'danger',  label: '⚠️ SA Brute Force',        icon: 'fa-skull' },
+        SUPERADMIN_FAILED_LOGIN:  { cls: 'warning', label: 'Tentative SA',            icon: 'fa-user-slash' },
+        SUPERADMIN_LOGIN:         { cls: 'success', label: 'SA Connecté',            icon: 'fa-shield-check' },
+        USER_LOGIN:               { cls: 'success', label: 'Connexion',               icon: 'fa-circle-check' },
+        DATA_LEAK_PREVENTED:      { cls: 'purple',  label: 'Fuite évitée',           icon: 'fa-database' },
+        BLOCKED_QUERY:            { cls: 'danger',  label: 'Requête bloquée',        icon: 'fa-ban' },
+        JWT_EXPIRED:              { cls: 'warning', label: 'Token expiré',           icon: 'fa-clock' },
+        JWT_INVALID:              { cls: 'danger',  label: 'Token falsifié',         icon: 'fa-key' },
+        RBAC_DENIED:              { cls: 'warning', label: 'Accès refusé',          icon: 'fa-lock' },
+        SQL_INJECTION_ATTEMPT:    { cls: 'danger',  label: '💉 Injection SQL',       icon: 'fa-syringe' },
+        AI_WRITE_ATTEMPT:         { cls: 'danger',  label: '✏️ Modif via IA',         icon: 'fa-pen-to-square',
+                                    extra: 'background:rgba(255,100,0,0.18);color:#ff6400;border-color:rgba(255,100,0,0.4)' },
+    };
+    const e = map[type] || { cls: 'info', label: type, icon: 'fa-circle-info' };
+    const style = e.extra ? ` style="${e.extra}"` : '';
+    return `<span class="badge ${e.cls}"${style}><i class="fa ${e.icon}"></i>${e.label}</span>`;
+}
+
+function renderSecLog(events) {
+    const tbody = document.getElementById('sec-log-body');
+    if (!events.length) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><i class="fa fa-shield-check"></i>Aucun événement de sécurité enregistré</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = events.map((e, idx) => `
+        <tr style="animation:fadeInUp 0.2s ease ${idx * 0.015}s both">
+            <td>${e.timestamp || '—'}</td>
+            <td><span style="color:var(--accent-cyan);font-size:0.8rem">${e.ip}</span></td>
+            <td><span style="font-size:0.78rem;color:var(--text-muted)">${e.geo || '<span style="color:rgba(100,116,139,0.5)">—</span>'}</span></td>
+            <td>${getEventBadge(e.type)}</td>
+            <td style="color:var(--text-muted);font-size:0.78rem;max-width:360px">${e.details}</td>
+        </tr>
+    `).join('');
+}
+
+function filterSecLog() {
+    const q = document.getElementById('sec-filter').value.toLowerCase();
+    const type = document.getElementById('sec-type-filter').value;
+    const filtered = allSecLogs.filter(e => {
+        const matchType = !type || e.type.includes(type);
+        const matchQ = !q || (e.ip + e.type + e.details + e.timestamp).toLowerCase().includes(q);
+        return matchType && matchQ;
+    });
+    renderSecLog(filtered);
+}
+
+// ─── AI LOGS ───
+async function loadAiLogs() {
+    const btn = document.getElementById('refresh-ai');
+    btn.classList.add('spinning');
+    const data = await apiGet('ai-logs?limit=100');
+    btn.classList.remove('spinning');
+    if (!data) return;
+    allAiLogs = data.logs || [];
+    document.getElementById('ai-log-count').textContent = `${allAiLogs.length} requêtes`;
+    renderAiLogs(allAiLogs);
+}
+
+function renderAiLogs(logs) {
+    const tbody = document.getElementById('ai-log-body');
+    if (!logs.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="fa fa-robot"></i>Aucune requête IA enregistrée</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = logs.map((r, idx) => {
+        const t = Math.min(r.temps_reponse_ms || 0, 5000);
+        const barW = Math.round((t / 5000) * 100);
+        const barColor = t < 1000 ? 'var(--accent-green)' : t < 3000 ? 'var(--accent-orange)' : 'var(--accent-red)';
+        const dt = r.date_requete ? new Date(r.date_requete).toLocaleString('fr-FR') : '—';
+        return `
+        <tr style="animation:fadeInUp 0.2s ease ${idx * 0.01}s both">
+            <td>
+                <div style="font-size:0.82rem;color:var(--text-primary)">${r.nom || '—'}</div>
+                <div style="font-size:0.72rem;color:var(--text-muted)">${r.utilisateur_email || ''}</div>
+            </td>
+            <td><div class="ai-query-text" title="${r.question || ''}">${r.question || '—'}</div></td>
+            <td><div class="sql-snippet" title="${r.sql_genere || ''}">${r.sql_genere || 'NON_SQL'}</div></td>
+            <td>
+                <div class="response-time-bar">
+                    <div class="time-bar-fill" style="width:${barW}px;background:${barColor}"></div>
+                    <span style="font-size:0.75rem;color:${barColor}">${r.temps_reponse_ms ? r.temps_reponse_ms+'ms' : '—'}</span>
+                </div>
+            </td>
+            <td style="color:var(--text-muted);font-size:0.78rem">${dt}</td>
+        </tr>`;
+    }).join('');
+}
+
+function filterAiLogs() {
+    const q = document.getElementById('ai-filter').value.toLowerCase();
+    const filtered = allAiLogs.filter(r => {
+        return !q || ((r.utilisateur_email || '') + (r.nom || '') + (r.question || '') + (r.sql_genere || '')).toLowerCase().includes(q);
+    });
+    renderAiLogs(filtered);
+}
+
+// ─── SESSIONS ───
+async function loadSessions() {
+    const btn = document.getElementById('refresh-sess');
+    btn.classList.add('spinning');
+    const data = await apiGet('active-sessions');
+    btn.classList.remove('spinning');
+    if (!data) return;
+
+    const tbody = document.getElementById('sessions-body');
+    const sessions = data.sessions || [];
+    if (!sessions.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="fa fa-users-slash"></i>Aucun gestionnaire trouvé</div></td></tr>`;
+        return;
+    }
+
+    const roleColors = { admin: 'danger', gestionnaire: 'info', lecteur: 'success' };
+
+    tbody.innerHTML = sessions.map((s, idx) => {
+        // Statut de connexion basé sur le champ 'connecte' venant de security.log
+        const isConnected = s.connecte === true;
+        const statusBadge = isConnected
+            ? `<span class="badge success"><i class="fa fa-circle" style="font-size:0.5rem"></i> Connecté</span>`
+            : `<span class="badge" style="background:rgba(100,116,139,0.1);color:var(--text-muted);border-color:rgba(100,116,139,0.3)"><i class="fa fa-moon"></i> Inactif</span>`;
+
+        // Dernière connexion réelle (depuis security.log)
+        const loginStr = s.derniere_connexion
+            ? `<span style="color:var(--accent-green);font-size:0.78rem">${s.derniere_connexion}</span>`
+            : `<span style="color:rgba(100,116,139,0.5)">—</span>`;
+
+        // Dernière utilisation de l'IA
+        const iaStr = s.derniere_activite
+            ? new Date(s.derniere_activite).toLocaleString('fr-FR')
+            : '<span style="color:rgba(100,116,139,0.5)">Jamais utilisé</span>';
+
+        return `
+        <tr style="animation:fadeInUp 0.2s ease ${idx * 0.02}s both${isConnected ? ';border-left:2px solid var(--accent-green)' : ''}">
+            <td style="font-weight:600">${s.nom || '—'}</td>
+            <td style="color:var(--accent-cyan)">${s.email}</td>
+            <td><span class="badge ${roleColors[s.role] || 'info'}">${s.role}</span></td>
+            <td>${statusBadge}</td>
+            <td style="font-size:0.78rem">${loginStr}</td>
+            <td style="color:var(--text-muted);font-size:0.78rem">${iaStr}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ─── ACCOUNTS MANAGEMENT ───
+async function loadAccounts() {
+    const data = await apiGet('active-sessions');
+    if (!data) return;
+
+    const tbody = document.getElementById('accounts-body');
+    const sessions = data.sessions || [];
+    document.getElementById('accounts-total').textContent = sessions.length;
+
+    if (!sessions.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="fa fa-users-slash"></i>Aucun compte trouvé</div></td></tr>`;
+        return;
+    }
+
+    const roleColors = { admin: 'danger', gestionnaire: 'info', lecteur: 'success' };
+    const statusConfig = {
+        actif: { label: 'Actif', cls: 'success', icon: 'fa-check-circle' },
+        en_attente: { label: 'En attente', cls: 'warning', icon: 'fa-clock' },
+        revoque: { label: 'Révoqué', cls: 'danger', icon: 'fa-ban' }
+    };
+
+    tbody.innerHTML = sessions.map((s, idx) => {
+        const st = statusConfig[s.statut] || statusConfig['actif'];
+        const isAdmin = s.role === 'admin';
+        const isRevoked = s.statut === 'revoque';
+
+        let actions = '';
+        if (!isAdmin) {
+            if (isRevoked) {
+                actions = `<button onclick="accountAction('${s.email}','reactivate')" class="soc-action-btn" style="color:var(--accent-green)" title="Réactiver"><i class="fa fa-rotate-left"></i></button>`;
+            } else {
+                actions = `
+                    <button onclick="accountAction('${s.email}','reset-password')" class="soc-action-btn" style="color:var(--accent-orange)" title="Reset mot de passe"><i class="fa fa-key"></i></button>
+                    <button onclick="accountAction('${s.email}','revoke')" class="soc-action-btn" style="color:var(--accent-red)" title="Révoquer l'accès"><i class="fa fa-ban"></i></button>
+                `;
+            }
+        } else {
+            actions = '<span style="color:var(--text-muted);font-size:0.75rem">Protégé</span>';
+        }
+
+        return `
+        <tr style="animation:fadeInUp 0.2s ease ${idx * 0.02}s both">
+            <td style="font-weight:600">${s.nom || '—'}</td>
+            <td style="color:var(--accent-cyan);font-size:0.85rem">${s.email}</td>
+            <td><span class="badge ${roleColors[s.role] || 'info'}">${s.role}</span></td>
+            <td><span class="badge ${st.cls}"><i class="fa ${st.icon}" style="font-size:0.55rem"></i> ${st.label}</span></td>
+            <td style="display:flex;gap:6px">${actions}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function createAccount() {
+    const nom = document.getElementById('new-nom').value.trim();
+    const email = document.getElementById('new-email').value.trim();
+    const role = document.getElementById('new-role').value;
+    const msgEl = document.getElementById('create-msg');
+    const btn = document.getElementById('btn-create');
+    msgEl.style.display = 'none';
+
+    if (!nom || !email) {
+        showCreateMsg('Veuillez remplir le nom et l\'email.', false);
+        return;
+    }
+
+    btn.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i> Envoi...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${API}/api/superadmin/users`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SA_TOKEN}`
+            },
+            body: JSON.stringify({ nom, email, role })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            showCreateMsg(data.detail || 'Erreur lors de la création.', false);
+            return;
+        }
+
+        showCreateMsg(data.message + (data.email_sent ? ' ✉️' : ' ⚠️ Email non envoyé (Erreur service de messagerie)'), true);
+        document.getElementById('new-nom').value = '';
+        document.getElementById('new-email').value = '';
+        loadAccounts();
+    } catch (e) {
+        showCreateMsg('Impossible de contacter le serveur.', false);
+    } finally {
+        btn.innerHTML = '<i class="fa fa-paper-plane"></i> Créer et envoyer';
+        btn.disabled = false;
+    }
+}
+
+function showCreateMsg(msg, success) {
+    const el = document.getElementById('create-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = success ? 'rgba(0,255,136,0.1)' : 'rgba(255,40,85,0.1)';
+    el.style.color = success ? 'var(--accent-green)' : 'var(--accent-red)';
+    el.style.border = `1px solid ${success ? 'rgba(0,255,136,0.3)' : 'rgba(255,40,85,0.3)'}`;
+}
+
+async function accountAction(email, action) {
+    const labels = {
+        'reset-password': `Réinitialiser le mot de passe de ${email} ? Un email sera envoyé.`,
+        'revoke': `Révoquer l'accès de ${email} ? Cette personne ne pourra plus se connecter.`,
+        'reactivate': `Réactiver le compte ${email} ? Un email d'activation sera envoyé.`
+    };
+
+    if (!confirm(labels[action])) return;
+
+    const method = action === 'reset-password' ? 'POST' : 'PUT';
+    const url = `${API}/api/superadmin/users/${encodeURIComponent(email)}/${action}`;
+
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: { 'Authorization': `Bearer ${SA_TOKEN}` }
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.detail || 'Erreur');
+            return;
+        }
+
+        alert(data.message);
+        loadAccounts();
+        loadSessions();
+    } catch (e) {
+        alert('Impossible de contacter le serveur.');
+    }
+}
+</script>
+</body>
+</html>
