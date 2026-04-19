@@ -50,8 +50,8 @@
      PAGE DE GARDE
   ══════════════════════════════════════════ */
   .cover { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 250mm; }
-  .cover-top { text-align: center; margin-bottom: 10px; }
-  .cover-univ { font-size: 15pt; font-weight: bold; text-transform: uppercase; margin-bottom: 18px; letter-spacing: 0.5px; }
+  .cover-top { text-align: center; margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .cover-univ { font-size: 22pt; font-weight: 900; text-transform: uppercase; margin-bottom: 18px; letter-spacing: 1px; color: #1a1a1a; text-align: center; }
   .cover-logo { width: 140px; height: 140px; object-fit: contain; margin: 15px auto 20px; display: block; }
   .cover-logo-placeholder {
     width: 140px; height: 140px; border-radius: 50%;
@@ -61,10 +61,10 @@
     color: white; font-size: 12pt; font-weight: bold; text-align: center;
     letter-spacing: 1px; padding: 10px;
   }
-  .cover-school { font-size: 19pt; font-weight: bold; margin-bottom: 8px; color: #1565C0; text-transform: uppercase; letter-spacing: 0.5px; text-align:center; }
-  .cover-dept { font-size: 14pt; font-weight: bold; margin-bottom: 25px; text-align:center; }
-  .cover-diplome { font-size: 12pt; font-weight: bold; margin-bottom: 4px; }
-  .cover-module { font-size: 11pt; color: #1565C0; margin-bottom: 20px; }
+  .cover-school { font-size: 17pt; font-weight: 800; margin-bottom: 8px; color: #1565C0; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+  .cover-dept { font-size: 14pt; font-weight: bold; margin-bottom: 25px; text-align: center; color: #333; }
+  .cover-diplome { font-size: 12pt; font-weight: bold; margin-bottom: 4px; text-align: center; }
+  .cover-module { font-size: 11pt; color: #1565C0; margin-bottom: 20px; text-align: center; }
   .cover-separator { border: none; border-top: 2px solid #333; width: 100%; margin: 12px 0; }
   .cover-theme-label { font-size: 13pt; font-style: italic; margin-bottom: 6px; }
   .cover-theme { font-size: 13pt; font-weight: bold; margin-bottom: 0; }
@@ -320,7 +320,8 @@
     <li class="toc-h1"><a href="#chap5">V. Exemples de requêtes SQL générées</a></li>
     <li class="toc-h1"><a href="#chap6">VI. Déploiement et Sécurisation</a></li>
     <li class="toc-h1"><a href="#chap7">VII. Validation et Scénarios de Test</a></li>
-    <li class="toc-h1"><a href="#chap8">VIII. Conclusion et Perspectives</a></li>
+    <li class="toc-h1"><a href="#chap8">Conclusion et Perspectives</a></li>
+    <li class="toc-h1"><a href="#annexes">Annexes : Livrables du projet</a></li>
   </ul>
 </div>
 
@@ -384,14 +385,9 @@
       <tr><td>②</td><td>VÉHICULE — <em>utilise</em> — TRAJET</td><td>(0,N) : (1,1)</td><td>Un trajet utilise exactement 1 véhicule.</td></tr>
       <tr><td>③</td><td>VÉHICULE — <em>subit</em> — MAINTENANCE</td><td>(0,N) : (1,1)</td><td>Une maintenance concerne exactement 1 véhicule.</td></tr>
       <tr><td>④</td><td>CHAUFFEUR — <em>effectue</em> — TRAJET</td><td>(0,N) : (1,1)</td><td>Un trajet est effectué par exactement 1 chauffeur.</td></tr>
-      <tr><td>⑤</td><td>TRAJET — <em>planifie</em> — LIGNE</td><td>(1,1) : (1,N)</td><td>Un trajet appartient à exactement 1 ligne.</td></tr>
-      <tr><td>⑥</td><td>LIGNE — <em>applique</em> — TARIF</td><td>(1,N) : (1,1)</td><td>Une ligne définit 1 ou N tarifs (normal / étudiant / senior).</td></tr>
-      <tr><td>⑦</td><td>LIGNE — <em>passe_par</em> — ARRET</td><td>(1,N) : (0,N)</td><td>Association N:M → table <code>ligne_arrets</code> avec attributs ordre et temps_estime.</td></tr>
-      <tr><td>⑧</td><td>TRAJET — <em>génère</em> — INCIDENT</td><td>(0,N) : (1,1)</td><td>Un incident est lié à exactement 1 trajet.</td></tr>
-      <tr><td>⑨</td><td>LIGNE — <em>définit</em> — HORAIRE</td><td>(1,N) : (1,1)</td><td>Un horaire appartient à 1 ligne. Une ligne a 1 ou N horaires.</td></tr>
-      <tr><td>⑩</td><td>UTILISATEUR — <em>génère</em> — LOGS_REQUETES</td><td>(1,1) : (0,N)</td><td>Un log appartient à 1 utilisateur. Un utilisateur génère 0 ou N requêtes IA.</td></tr>
     </tbody>
   </table>
+  <p style="font-size: 10pt; font-style: italic; text-align: center; margin-top: 5px; color: #555;">Note : Seules les principales associations sont listées ici pour alléger le document. L'exhaustivité est visible de manière interactive dans le lien MCD fourni ci-dessus.</p>
 </div>
 
 <!-- MLD -->
@@ -769,8 +765,8 @@ transpobot/
   
   <p>La solution a été d'utiliser l'interface de programmation des <strong>Tâches Planifiées</strong> d'AlwaysData. Un script s'exécute automatiquement en tâche de fond toutes les <strong>11 minutes</strong> sur leurs serveurs d'administration :</p>
   
-  <div class="callout" style="font-family:monospace; font-size:13px; background-color:#1e1e1e; color:#00ff00; border-left:4px solid #1976D2; overflow-x: auto; white-space: nowrap;">
-    curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" https://transpobot-api.onrender.com
+  <div class="callout" style="font-family:monospace; font-size:13px; background-color:#1e1e1e; color:#00ff00; border-left:4px solid #1976D2; white-space: pre-wrap; word-break: break-all;">
+    curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" https://transpobot-api.onrender.com
   </div>
   
   <p>Cet appel artificiel, se faisant passer pour un navigateur classique via le <em>User-Agent</em>, valide le trafic auprès de Render, simulant qu'un agent utilise constamment TranspoBot. La latence de l'API est donc perpétuellement abaissée à <strong>0 seconde</strong> de refroidissement (disponibilité 24/7).</p>
@@ -811,7 +807,7 @@ transpobot/
   CHAPITRE VIII — CONCLUSION
 ════════════════════════════════════════ -->
 <div class="page page-break" id="chap8">
-  <h1 class="section-title">VIII. Conclusion Générale et Perspectives</h1>
+  <h1 class="section-title">Conclusion Générale et Perspectives</h1>
 
   <p>Le projet <strong>TranspoBot</strong> a atteint et dépassé l'ensemble des objectifs fixés par le cahier des charges. En partant d'un besoin réel du secteur du transport urbain — l'exploitation accessible de données opérationnelles complexes — nous avons conçu et livré une application web complète, déployée en production et opérationnelle.</p>
 
@@ -859,12 +855,65 @@ transpobot/
   </ul>
   <p>Cette synergie homme-machine nous a permis d'optimiser le développement technique tout en conservant le contrôle absolu sur l'architecture métier et la logique de conception.</p>
 
-  <div class="callout green" style="margin-top:20px">
-    <strong>Lien production :</strong> L'application TranspoBot est accessible en ligne à l'adresse
-    <a href="https://transpobot-api.onrender.com" target="_blank" style="color:#1565C0;font-weight:600;">https://transpobot-api.onrender.com</a>
-    — Code source disponible sur <a href="https://github.com/informaticienC69/transpobot1" target="_blank" style="color:#1565C0;font-weight:600;">GitHub : informaticienC69/transpobot1</a>
+  <div class="callout green" style="margin-top:20px; display:none;">
+    <strong>Lien production :</strong> L'application TranspoBot est accessible en ligne à l'adresse...
   </div>
 </div>
 
+<!-- ════════════════════════════════════════
+  ANNEXES
+════════════════════════════════════════ -->
+<div class="page page-break" id="annexes">
+  <h1 class="section-title">Annexes : Livrables du Projet</h1>
+
+  <div class="callout orange" style="margin-bottom: 20px;">
+    <strong>⚠️ Informations de Connexion (Validation Démos)</strong><br>
+    L'authentification est <strong>obligatoire</strong> pour évaluer l'application. Le lien principal mène à la page de connexion. L'accès à l'IA se fait nativement via l'onglet <em>Dashboard</em> (Ctrl+K).
+    <ul style="list-style-type: none; margin: 8px 0 14px 15px;">
+      <li>👤 <strong>Compte Gestionnaire :</strong> <code>hadykaloga@esp.sn</code></li>
+      <li>🔑 <strong>Mot de passe :</strong> <code>Groupe12.</code></li>
+    </ul>
+    
+    <hr style="border:none; border-top:1px solid #ffb74d; margin:10px 0;">
+    
+    <strong>🛡️ Portail de supervision (SuperAdmin / SOC)</strong><br>
+    Un espace radicalement isolé permet de superviser les logs IA et la sécurité anti-bruteforce.<br>
+    <strong>URL dédiée :</strong> <a href="https://transpobot-api.onrender.com/superadmin.html" target="_blank" style="color:#e65100;">https://transpobot-api.onrender.com/superadmin.html</a>
+    <ul style="list-style-type: none; margin: 8px 0 0 15px;">
+      <li>👤 <strong>Identifiant SuperAdmin :</strong> <code>h@ack_me</code></li>
+      <li>🔑 <strong>Mot de passe :</strong> <code>Bru-15te_f@rceNemarchepas</code></li>
+    </ul>
+  </div>
+
+  <p>L'intégralité du projet TranspoBot est assortie des livrables suivants, validés et remis :</p>
+  
+  <table>
+    <thead><tr><th style="width:40%">Livrable documentaire / technique</th><th>Lien d'accès ou Fichier</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Plateforme déployée</strong></td><td><a href="https://transpobot-api.onrender.com" target="_blank" class="doc-link" style="margin:2px 0;width:100%">🌍 transpobot-api.onrender.com</a></td></tr>
+      <tr><td><strong>Interface de chat IA</strong></td><td><a href="https://transpobot-api.onrender.com" target="_blank" class="doc-link" style="margin:2px 0;width:100%">💬 Accès intégré sur le Dashboard</a></td></tr>
+      <tr><td><strong>Rapport de conception/réalisation</strong></td><td><a href="https://informaticienC69.github.io/transpobot1/docs/rapport_transpobot.html" target="_blank" class="doc-link" style="margin:2px 0;width:100%">📄 rapport_transpobot.html (Lien web)</a></td></tr>
+      <tr><td><strong>Présentation PowerPoint</strong></td><td><a href="https://informaticienC69.github.io/transpobot1/docs/presentation_soutenance.pptx" target="_blank" class="doc-link" style="margin:2px 0;width:100%">📊 presentation_soutenance.pptx (Lien web)</a></td></tr>
+      <tr><td><strong>Code source (Dépôt Git)</strong></td><td><a href="https://github.com/informaticienC69/transpobot1" target="_blank" class="doc-link" style="margin:2px 0;width:100%">💻 informaticienC69/transpobot1</a></td></tr>
+      <tr><td><strong>Script SQL (MCD/MLD)</strong></td><td><a href="https://github.com/informaticienC69/transpobot1/blob/main/init_alwaysdata.sql" target="_blank" class="doc-link" style="margin:2px 0;width:100%">🗄️ init_alwaysdata.sql</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    let pages = document.querySelectorAll('.page');
+    let pageNum = 1;
+    pages.forEach((p, index) => {
+      // Ignorer la page de garde pour la numérotation
+      if (index === 0) return;
+      let footer = document.createElement('div');
+      footer.className = 'page-footer';
+      footer.innerHTML = `<span>Projet TranspoBot — ESP/DIC1</span><span>Page ${pageNum}</span>`;
+      p.appendChild(footer);
+      pageNum++;
+    });
+  });
+</script>
 </body>
 </html>
