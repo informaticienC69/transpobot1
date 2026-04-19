@@ -43,7 +43,6 @@
       box-shadow: none !important;
       width: 100% !important;
       min-height: auto !important;
-      page-break-inside: avoid;
     }
     .page-break { page-break-before: always !important; }
     .no-print { display: none !important; }
@@ -63,6 +62,10 @@
     td, th { padding: 4px 5px !important; }
     /* Page footer */
     .page-footer { position: relative !important; bottom: auto !important; left: auto !important; right: auto !important; margin-top: 15px !important; }
+    /* Limiter la taille des images */
+    img { max-height: 180px !important; object-fit: contain !important; }
+    /* Éviter les coupures dans les petits blocs */
+    .fonc-box, .callout, h1, h2, h3 { break-inside: avoid !important; }
   }
   @page { size: A4 portrait; margin: 15mm 15mm 15mm 20mm; }
 
@@ -549,7 +552,9 @@ transpobot/
 
     </tbody>
   </table>
+</div>
 
+<div class="page page-break">
   <!-- III.1 REQUIS -->
   <h2 class="subsection-title" id="chap3-1">III.1 Fonctionnalités requises</h2>
 
@@ -624,6 +629,9 @@ transpobot/
   </div>
   <p class="figure-caption">Figure 5 — Assistant IA conversationnel : Blocage sécuritaire d'une requête de modification (NON_SQL)</p>
 
+</div>
+
+<div class="page page-break">
   <!-- III.3 SUPPLÉMENTAIRES -->
   <h2 class="subsection-title" id="chap3-3">III.3 Fonctionnalités supplémentaires développées</h2>
   <p>Au-delà du cahier des charges, les fonctionnalités suivantes ont été développées pour produire un système complet et robuste :</p>
@@ -761,6 +769,9 @@ transpobot/
     <li>À chaque <code>git push main</code> sur le référentiel GitHub, un hook web prévient <strong>Render</strong> qui déclenche automatiquement le <em>build</em> et redéploie le système de manière transparente (CI/CD).</li>
   </ul>
 
+  </div>
+
+<div class="page page-break">
   <h2 class="subsection-title">VI.2 Initialisation de la Base de Données & Sécurisation absolue</h2>
   <p>La persistance des données est isolée sur un serveur <strong>AlwaysData</strong> hébergeant une base MySQL 8. L'architecture a été amorcée via l'importation directe de notre fichier souche robuste <code>init_alwaysdata.sql</code> dans le client phpMyAdmin de production. Cela a garanti la création des 13 tables relationnelles de manière idempotente ainsi que l'ancrage des triggers métiers (calcul des recettes automatiques).</p>
 
