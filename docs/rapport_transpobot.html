@@ -35,16 +35,49 @@
   /* ══════════════════════════════════════════
      PRINT
   ══════════════════════════════════════════ */
-  @media print {
-    body { background: white; }
-    .page {
-      margin: 0; padding: 25mm 25mm 20mm 30mm;
-      box-shadow: none; width: 100%;
-    }
-    .page-break { page-break-before: always; }
-    .no-print { display: none; }
+  @page {
+    size: A4;
+    margin: 25mm 20mm 20mm 25mm;
   }
-  @page { size: A4; margin: 0; }
+  @page :first {
+    margin: 0;
+  }
+
+  @media print {
+    body { background: white; margin: 0; padding: 0; }
+    .page {
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+      width: auto;
+      min-height: auto;
+      page-break-after: always;
+    }
+    .page:last-child { page-break-after: avoid; }
+    .page-break { page-break-before: always; }
+    .no-print { display: none !important; }
+
+    /* Numérotation CSS automatique — fonctionne sans JavaScript */
+    body { counter-reset: page-num 1; }
+    .page.page-break {
+      counter-increment: page-num;
+    }
+    .page.page-break::after {
+      content: 'Projet TranspoBot — ESP/DIC1  ·  Page ' counter(page-num);
+      display: block;
+      text-align: right;
+      font-size: 8.5pt;
+      color: #999;
+      border-top: 1px solid #ddd;
+      padding-top: 5px;
+      margin-top: 12mm;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Assure que les liens sont visibles et cliquables */
+    a[href] { color: #1565C0 !important; text-decoration: underline !important; }
+    .doc-link { background: transparent !important; border-color: #1565C0 !important; }
+  }
 
   /* ══════════════════════════════════════════
      PAGE DE GARDE
@@ -179,7 +212,7 @@
   .figure-caption { text-align: center; font-size: 10pt; color: #555; font-style: italic; margin-top: -8px; margin-bottom: 14px; }
 
   /* ══════════════════════════════════════════
-     FOOTER PAGE
+     FOOTER PAGE (affiché uniquement en mode navigateur)
   ══════════════════════════════════════════ */
   .page-footer {
     position: absolute; bottom: 15mm; left: 30mm; right: 25mm;
@@ -187,6 +220,7 @@
     border-top: 1px solid #ddd; padding-top: 6px;
     font-size: 9pt; color: #999;
   }
+  @media print { .page-footer { display: none; } }
 
   /* ══════════════════════════════════════════
      TABLE DES MATIÈRES SECTION
@@ -898,14 +932,15 @@ transpobot/
 </div>
 
 <script>
+  // Numérotation dynamique pour la vue navigateur uniquement
+  // En impression PDF, c'est le CSS counter qui s'en charge automatiquement
   document.addEventListener("DOMContentLoaded", () => {
     let pages = document.querySelectorAll('.page');
     let pageNum = 1;
     pages.forEach((p, index) => {
-      // Ignorer la page de garde pour la numérotation
-      if (index === 0) return;
+      if (index === 0) return; // Ignorer la page de garde
       let footer = document.createElement('div');
-      footer.className = 'page-footer';
+      footer.className = 'page-footer no-print'; // no-print = masqué à l'impression (CSS counter prend le relais)
       footer.innerHTML = `<span>Projet TranspoBot — ESP/DIC1</span><span>Page ${pageNum}</span>`;
       p.appendChild(footer);
       pageNum++;
