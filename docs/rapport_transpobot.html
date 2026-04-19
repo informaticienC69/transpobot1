@@ -525,12 +525,12 @@ transpobot/
       <tr><td>Sécurité</td><td>Journal de sécurité (logs_securite) + blocage brute-force</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
       <tr><td>Administration</td><td>Portail SuperAdmin (5 onglets supervision)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
       <tr><td>BDD</td><td>Triggers MySQL (calcul recette automatique)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
-      <tr><td>Déploiement</td><td>CI/CD automatique depuis GitHub (Render + AlwaysData)</td><td><span class="badge-sup">SUPPLÉMENTAIRE</span></td></tr>
+
     </tbody>
   </table>
 
   <!-- III.1 REQUIS -->
-  <h2 class="subsection-title" id="chap3-1">III.1 Fonctionnalités requises (Cahier des charges)</h2>
+  <h2 class="subsection-title" id="chap3-1">III.1 Fonctionnalités requises</h2>
 
   <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Tableau de bord avec indicateurs clés (KPI)</h3>
   <div class="fonc-box">
@@ -646,10 +646,7 @@ transpobot/
     <p>Au-delà du simple tableau de données requis, un second appel LLM (température 0.4) génère une réponse analytique naturelle <em>comme un vrai analyste</em>. L'utilisateur reçoit donc : une réponse textuelle fluide <strong>et</strong> le tableau de données.</p>
   </div>
 
-  <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Déploiement CI/CD automatique</h3>
-  <div class="fonc-box sup">
-    <p>Intégration GitHub → Render avec déploiement automatique à chaque <code>git push</code> sur <code>main</code>. HTTPS manag, 0 configuration serveur manuelle. Base de données MySQL hébergée sur AlwaysData avec connexion SSL depuis Render.</p>
-  </div>
+
 </div>
 
 <!-- ════════════════════════════════════════
