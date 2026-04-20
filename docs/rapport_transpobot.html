@@ -39,13 +39,20 @@
     body { background: white; margin: 0; padding: 0; }
     .page {
       margin: 0 !important;
-      padding: 20mm 20mm 18mm 25mm !important;
+      padding: 15mm 15mm 15mm 20mm !important;
       box-shadow: none !important;
       width: 100% !important;
       min-height: auto !important;
+      display: block !important;
     }
     .page-break { page-break-before: always !important; }
     .no-print { display: none !important; }
+    
+    /* Prevent Flexbox print crash in chromium */
+    .cover, .cover-top, .cover-bottom { display: block !important; text-align: center !important; }
+    .cover { min-height: auto !important; }
+    .cover-bottom { display: flex !important; margin-top: 60px !important; }
+
     /* Make links visible and clickable in PDF */
     a { color: #1565C0 !important; text-decoration: underline !important; }
     .doc-link { 
@@ -55,19 +62,26 @@
       padding: 4px 8px !important;
       display: inline-block !important;
     }
+    
     /* Prevent code blocks from overflowing */
     pre { white-space: pre-wrap !important; word-break: break-word !important; overflow: hidden !important; }
+    
     /* Prevent tables from overflowing */ 
     table { width: 100% !important; font-size: 9pt !important; }
     td, th { padding: 4px 5px !important; }
+    
     /* Page footer */
     .page-footer { position: relative !important; bottom: auto !important; left: auto !important; right: auto !important; margin-top: 15px !important; }
+    
     /* Limiter la taille des images */
-    img { max-height: 180px !important; object-fit: contain !important; }
-    /* Éviter les coupures dans les petits blocs */
-    .fonc-box, .callout, h1, h2, h3 { break-inside: avoid !important; }
+    img { max-height: 250px !important; object-fit: contain !important; page-break-inside: avoid !important; }
+    
+    /* Éviter les coupures dans les petits blocs (Safe ones only) */
+    h1, h2, h3 { break-inside: avoid !important; }
   }
-  @page { size: A4 portrait; margin: 15mm 15mm 15mm 20mm; }
+  
+  /* Setting margin 0 removes Browser Default Date, Time, and URLs from Headers/Footers */
+  @page { size: A4 portrait; margin: 0; }
 
   /* ══════════════════════════════════════════
      PAGE DE GARDE
