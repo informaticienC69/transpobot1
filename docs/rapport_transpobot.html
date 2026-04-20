@@ -279,7 +279,8 @@
       <p class="cover-school">École Supérieure Polytechnique de Dakar</p>
       <p class="cover-dept">Département Génie Informatique</p>
       <hr class="cover-separator" style="margin:14px 0;">
-      <p class="cover-diplome">Diplôme d'Ingénieur de Conception en Génie Informatique 1<sup>ère</sup> Année (DIC1)</p>
+      <p class="cover-diplome">Diplôme d'Ingénieur de Conceptionen en Génie Informatique <sup>ère</sup> Année (DIC1)
+      </p>
       <p class="cover-module">Projet de fin de module SGBD</p>
     </div>
 
@@ -384,7 +385,7 @@
   <div class="callout">
     <p>La base de données <code>informaticienc_transpobot</code> comprend <strong>13 tables SQL</strong>. Afin de synthétiser ce rapport et d'alléger la lecture, l'intégralité du dictionnaire des données (tous les attributs, types SQL et contraintes) a été déportée dans un document interactif dédié.</p>
     <div style="text-align:center;margin:14px 0 8px;">
-      <a href="https://informaticienC69.github.io/transpobot1/mld.html" target="_blank" class="doc-link">📋 Consulter le Dictionnaire de données complet &rarr;</a>
+      <a href="mld.html" target="_blank" class="doc-link">📋 Consulter le Dictionnaire de données complet &rarr;</a>
     </div>
   </div>
 </div>
@@ -396,10 +397,10 @@
   <p>Le modèle TranspoBot comporte <strong>12 entités</strong> et <strong>10 associations</strong> :</p>
 
   <div style="text-align:center;margin:18px 0 8px;">
-    <a href="https://informaticienC69.github.io/transpobot1/mcd.html" target="_blank" class="doc-link">📊 Consulter le diagramme MCD interactif complet &rarr;</a>
+    <a href="mcd.html" target="_blank" class="doc-link">📊 Consulter le diagramme MCD interactif complet &rarr;</a>
   </div>
 
-  <p class="figure-caption">Figure 1 — Modèle Conceptuel de Données (Notation Merise) — <a href="https://informaticienC69.github.io/transpobot1/mcd.html" target="_blank" style="color:#1565C0">mcd.html</a></p>
+  <p class="figure-caption">Figure 1 — Modèle Conceptuel de Données (Notation Merise) — <a href="mcd.html" target="_blank" style="color:#1565C0">mcd.html</a></p>
 
   <h3 class="subsubsection-title">Principales associations et cardinalités</h3>
   <table>
@@ -420,7 +421,7 @@
   <p>Le MLD traduit le MCD en un schéma relationnel exploitable par MySQL. Les clés étrangères remplacent les associations, et les tables d'association N:M deviennent des relations à part entière (ex: <code>ligne_arrets</code>). De plus, deux triggers MySQL (déclencheurs automatiques) gèrent le calcul automatique de la recette passagers pour éviter les erreurs humaines.</p>
 
   <div style="text-align:center;margin:18px 0 8px;">
-    <a href="https://informaticienC69.github.io/transpobot1/mld.html" target="_blank" class="doc-link">📋 Consulter le diagramme MLD complet interactif &rarr;</a>
+    <a href="mld.html" target="_blank" class="doc-link">📋 Consulter le diagramme MLD complet interactif &rarr;</a>
   </div>
 </div>
 
@@ -474,7 +475,7 @@
   <p>Le Dashboard interagite avec une API FastAPI qui orchestre la communication entre la persistance des données sur MySQL et le pipeline cognitif sur l'API Groq (moteur d'inférence LLaMA-3).</p>
 
   <div style="text-align:center;margin:18px 0 24px;">
-    <a href="https://informaticienC69.github.io/transpobot1/architecture_transpobot.html" target="_blank" class="doc-link">🏗️ Consulter le Schéma d'Architecture global interactif &rarr;</a>
+    <a href="architecture_transpobot.html" target="_blank" class="doc-link">🏗️ Consulter le Schéma d'Architecture global interactif &rarr;</a>
   </div>
 </div>
 
@@ -581,7 +582,9 @@ transpobot/
     <img src="images/chat_vehicules.png" alt="Liste des véhicules avec statuts" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
   </div>
   <p class="figure-caption">Figure 3 — Assistant IA : Extraction de la liste des véhicules avec statuts</p>
+</div>
 
+<div class="page page-break">
   <h3 class="subsubsection-title"><span class="badge-req">REQUISE</span> Affichage liste des chauffeurs</h3>
   <div class="fonc-box">
     <p>L'onglet <strong>Chauffeurs</strong> présente l'ensemble du personnel roulant avec : nom, prénom, numéro de permis, catégorie, disponibilité (badge vert/rouge), note moyenne sur 5, et véhicule affecté.</p>
@@ -659,7 +662,9 @@ transpobot/
   <div class="fonc-box sup">
     <p>Système d'invitation en 3 étapes : le SuperAdmin crée le compte → un email avec lien d'activation (token valide 48h) est envoyé → l'utilisateur choisit son mot de passe. Connexion via JWT HS256, expiration 8h, rôles RBAC (admin/gestionnaire/lecteur).</p>
   </div>
+</div>
 
+<div class="page page-break">
   <h3 class="subsubsection-title"><span class="badge-sup">SUPPLÉMENTAIRE</span> Journal de sécurité &amp; Protection brute-force</h3>
   <div class="fonc-box sup">
     <p>Chaque événement de sécurité (connexion réussie, échec, tentative brute-force, blocage) est enregistré dans <code>logs_securite</code> avec l'IP source et la géolocalisation estimée. Blocage automatique après N tentatives échouées.</p>
@@ -685,7 +690,7 @@ transpobot/
   <h1 class="section-title">IV. Prompt Engineering</h1>
 
   <div style="text-align:center;margin:12px 0 24px;">
-    <a href="https://informaticienC69.github.io/transpobot1/flux_ia_transpobot.html" target="_blank" class="doc-link">🧠 Consulter le diagramme du Flux IA (Text-to-SQL) &rarr;</a>
+    <a href="flux_ia_transpobot.html" target="_blank" class="doc-link">🧠 Consulter le diagramme du Flux IA (Text-to-SQL) &rarr;</a>
   </div>
 
   <p>Le <strong>Prompt Engineering</strong> est le cœur décisionnel de l'application quant à l'assistance intelligente. Pour éviter les hallucinations du modèle et garantir la sécurité du système d'information, la génération a été scindée en <strong>deux appels LLM distincts</strong> (LLaMA-3.3-70b).</p>
@@ -821,7 +826,9 @@ transpobot/
     <img src="images/dashboard_kpi.png" alt="Tableau de bord Transpobot KPI" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border:1px solid #ccc;">
   </div>
   <p class="figure-caption">Figure 10 — Test d'intégration : Actualisation instantanée des KPI de gestion sur le Dashboard</p>
+</div>
 
+<div class="page page-break">
   <h2 class="subsection-title">VII.2 Tests de Robustesse & Cybersécurité</h2>
   <p>Les vulnérabilités classiques (Brute Force, Cross-Site Scripting, accès hors privilèges) ont fait l'objet de tests red-team. Nous illustrons ici le bouclier anti-Brute Force bloquant un attaquant tentant de forcer l'accès d'un compte agent.</p>
 
@@ -933,25 +940,69 @@ transpobot/
   document.addEventListener("DOMContentLoaded", () => {
     let pages = document.querySelectorAll('.page');
     let pageNum = 1;
+    
+    // First, let's keep track of which ID is on which page
+    let idToPage = {};
+    
     pages.forEach((p, index) => {
-      // index 0 = Page de Garde (pas de numéro)
+      // index 0 = Page de Garde
       if (index === 0) return;
       
       let footer = document.createElement('div');
       footer.className = 'page-footer';
       
-      // index 1 = Table des Matières (pas de numérotation chiffrée)
+      // index 1 = Table des Matières
       if (index === 1) {
         footer.innerHTML = `<span>Projet TranspoBot — ESP/DIC1</span><span>Table des Matières</span>`;
         p.appendChild(footer);
         return;
       }
       
-      // index 2+ = Introduction = Page 1, puis 2, 3...
+      // Footer page numbering starts at 1 for Intro
       footer.innerHTML = `<span>Projet TranspoBot — ESP/DIC1</span><span>Page ${pageNum}</span>`;
       p.appendChild(footer);
+      
+      // Find all elements with an ID on this page
+      let elsWithId = p.querySelectorAll('[id]');
+      elsWithId.forEach(el => {
+        idToPage[el.id] = pageNum;
+      });
+      // also if the page itself has an ID
+      if (p.id) {
+        idToPage[p.id] = pageNum;
+      }
+      
       pageNum++;
     });
+
+    // Now update Table of contents numbers dynamically
+    let tocLinks = document.querySelectorAll('.toc-list a');
+    tocLinks.forEach(link => {
+      let href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        let id = href.substring(1);
+        if (idToPage[id]) {
+          let span = link.nextElementSibling;
+          if (span && span.classList.contains('toc-page')) {
+            // In the physical document, the Intro is page 3 (Cover + TOC = 2 pages)
+            // It's better to show the physical page (pageNum + 2) so PDF readers match!
+            span.textContent = (idToPage[id] + 2);
+          }
+        }
+      }
+    });
+
+    // Also update footers to show the physical page to match TOC correctly.
+    // Let's modify the footers we just appended (pageNum was internal logical, physical is +2)
+    let footers = document.querySelectorAll('.page-footer');
+    let physicalPage = 2; // For table of contents, it's page 2
+    footers.forEach((footer, idx) => {
+        if (idx > 0) { // skip TOC
+            physicalPage++;
+            footer.innerHTML = `<span>Projet TranspoBot — ESP/DIC1</span><span>Page ${physicalPage}</span>`;
+        }
+    });
+
   });
 </script>
 </body>
