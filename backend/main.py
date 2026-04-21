@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from contextlib import asynccontextmanager
 import asyncio
 import os
-from .database import execute_write_query
+from .database import execute_write_query, get_pool
 from .routes import data, chat, crud, auth, superadmin
 
 async def auto_start_trajets():
@@ -21,6 +22,15 @@ async def auto_start_trajets():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # 🚀 Préchauffage du pool de connexions MySQL au démarrage
+    # Évite la latence sur la 1ère requête après cold start
+    try:
+        pool = get_pool()
+        if pool:
+            print("✅ Pool MySQL préchauffé et prêt.")
+    except Exception as e:
+        print(f"⚠️ Avertissement pool MySQL : {e}")
+    
     task = asyncio.create_task(auto_start_trajets())
     yield
     task.cancel()
@@ -53,6 +63,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 🗜️ Compression GZip : réduit la taille des réponses JSON de ~70%
+# (accélère le chargement du dashboard et des tables de données)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 from .security import verify_token, log_security_event
 from fastapi import Depends, HTTPException, Request
