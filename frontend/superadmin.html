@@ -673,9 +673,8 @@
         <div class="soc-header-right">
             <div class="live-indicator">
                 <div class="live-dot"></div>
-                SYSTÈME ACTIF
+                DONNÉES EN DIRECT
             </div>
-            <span id="refresh-countdown" style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);letter-spacing:1px"></span>
             <div id="current-time">--:--:--</div>
             <button id="logout-btn" onclick="doLogout()">
                 <i class="fa fa-right-from-bracket"></i> Déconnexion
@@ -692,9 +691,6 @@
         </button>
         <button class="soc-tab" onclick="switchTab('ai-logs')" id="tab-ai-logs">
             <i class="fa fa-robot"></i> Logs IA
-        </button>
-        <button class="soc-tab" onclick="switchTab('sessions')" id="tab-sessions">
-            <i class="fa fa-users"></i> Sessions Utilisateurs
         </button>
         <button class="soc-tab" onclick="switchTab('accounts')" id="tab-accounts">
             <i class="fa fa-user-gear"></i> Gestion des Accès
@@ -928,8 +924,9 @@ let allSecLogs = [];
 let allAiLogs = [];
 let clockInterval = null;
 let autoRefreshInterval = null;
-const AUTO_REFRESH_SECONDS = 20;  // Actualisation automatique toutes les 20s
-let nextRefreshIn = AUTO_REFRESH_SECONDS;
+const AUTO_REFRESH_MS = 30000; // Actualisation silencieuse toutes les 30s
+// Snapshot des dernières valeurs pour le diff silencieux
+let _lastStats = null;
 
 // ─── MATRIX CANVAS ANIMATION ───
 (function initMatrix() {
@@ -974,32 +971,74 @@ function startClock() {
     clockInterval = setInterval(tick, 1000);
 }
 
-// ─── AUTO-REFRESH LIVE ───
+// ─── AUTO-REFRESH SILENCIEUX ───
+// Principe : on récupère les données en arrière-plan, et on compare
+// avec les valeurs déjà affichées. Le DOM n'est mis à jour QUE si les
+// données ont changé => zéro clignotement, zéro rechargement visible.
 function startAutoRefresh() {
-    nextRefreshIn = AUTO_REFRESH_SECONDS;
-    updateRefreshCounter();
-    autoRefreshInterval = setInterval(() => {
-        nextRefreshIn--;
-        updateRefreshCounter();
-        if (nextRefreshIn <= 0) {
-            // Recharge silencieuse des données live
-            loadSecurityLog();
-            loadSessions();
-            loadAccounts();
-            loadStats();
-            nextRefreshIn = AUTO_REFRESH_SECONDS;
+    autoRefreshInterval = setInterval(async () => {
+        // Mise à jour silencieuse des stats (chiffres en temps réel)
+        const data = await apiGet('stats');
+        if (data) silentUpdateStats(data);
+
+        // Si l'onglet sécurité/IA est actif, rafraîchir discrètement
+        const activePage = document.querySelector('.soc-page.active')?.id;
+        if (activePage === 'page-security') {
+            const sec = await apiGet('security-log?lines=200');
+            if (sec && sec.events) {
+                const newSig = sec.events.map(e => e.timestamp + e.type).join('');
+                const oldSig = allSecLogs.map(e => e.timestamp + e.type).join('');
+                if (newSig !== oldSig) {
+                    allSecLogs = sec.events;
+                    document.getElementById('sec-log-count').textContent = `${sec.total || 0} événements`;
+                    renderSecLog(allSecLogs);
+                }
+            }
         }
-    }, 1000);
+        if (activePage === 'page-ai-logs') {
+            const ai = await apiGet('ai-logs?limit=100');
+            if (ai && ai.logs) {
+                const newSig = (ai.logs[0]?.date_requete || '') + ai.logs.length;
+                const oldSig = (allAiLogs[0]?.date_requete || '') + allAiLogs.length;
+                if (newSig !== oldSig) {
+                    allAiLogs = ai.logs;
+                    document.getElementById('ai-log-count').textContent = `${allAiLogs.length} requêtes`;
+                    renderAiLogs(allAiLogs);
+                }
+            }
+        }
+    }, AUTO_REFRESH_MS);
+}
+
+// Met à jour uniquement les chiffres KPI qui ont changé — sans vider le DOM
+function silentUpdateStats(data) {
+    if (!_lastStats) { _lastStats = data; return; } // Rien à comparer au 1er appel
+    
+    const mapping = [
+        { key: 'total_users',        idx: 0 },
+        { key: 'trajets_today',      idx: 1 },
+        { key: 'incidents_ouverts',  idx: 2 },
+        { key: 'total_ai_queries',   idx: 3 },
+        { key: 'ai_queries_today',   idx: 4 },
+        { key: 'total_incidents',    idx: 6 },
+    ];
+    const cards = document.querySelectorAll('#stats-grid .stat-card-value');
+    mapping.forEach(({ key, idx }) => {
+        if (data[key] !== _lastStats[key] && cards[idx]) {
+            cards[idx].style.transition = 'color 0.4s';
+            cards[idx].style.color = 'var(--accent-cyan)';
+            cards[idx].textContent = data[key];
+            setTimeout(() => { if(cards[idx]) cards[idx].style.color = ''; }, 1500);
+        }
+    });
+    _lastStats = data;
 }
 
 function stopAutoRefresh() {
     if (autoRefreshInterval) { clearInterval(autoRefreshInterval); autoRefreshInterval = null; }
 }
 
-function updateRefreshCounter() {
-    const el = document.getElementById('refresh-countdown');
-    if (el) el.textContent = `Actualisation dans ${nextRefreshIn}s`;
-}
+function updateRefreshCounter() {} // Supprimé — plus de compteur visible
 
 // ─── CHECK EXISTING SESSION ───
 window.addEventListener('DOMContentLoaded', () => {
@@ -1123,13 +1162,93 @@ async function apiGet(endpoint) {
 // ─── LOAD STATS ───
 async function loadStats() {
     const btn = document.getElementById('refresh-stats');
-    btn.classList.add('spinning');
+    if (btn) btn.classList.add('spinning');
     const data = await apiGet('stats');
-    btn.classList.remove('spinning');
+    if (btn) btn.classList.remove('spinning');
     if (!data) return;
+
+    // Sauvegarder le snapshot pour le diff silencieux futur
+    _lastStats = data;
 
     const grid = document.getElementById('stats-grid');
     grid.innerHTML = '';
+
+    const cards = [
+        { label: 'Utilisateurs', value: data.total_users, icon: 'fa-users', color: 'var(--accent-cyan)', badge: 'Actifs' },
+        { label: "Trajets aujourd'hui", value: data.trajets_today, icon: 'fa-route', color: 'var(--accent-green)', badge: "Aujourd'hui" },
+        { label: 'Incidents ouverts', value: data.incidents_ouverts, icon: 'fa-triangle-exclamation', color: 'var(--accent-orange)', badge: data.incidents_ouverts > 0 ? 'Attention' : 'OK' },
+        { label: 'Requêtes IA totales', value: data.total_ai_queries, icon: 'fa-robot', color: 'var(--accent-purple)', badge: 'Historique' },
+        { label: "IA aujourd'hui", value: data.ai_queries_today, icon: 'fa-brain', color: 'var(--accent-blue)', badge: "Aujourd'hui" },
+        { label: 'Temps moyen IA', value: data.avg_ai_response_ms > 0 ? `${data.avg_ai_response_ms}ms` : 'N/A', icon: 'fa-bolt', color: 'var(--accent-cyan)', badge: data.avg_ai_response_ms > 0 ? "Aujourd'hui" : 'Aucune requête' },
+        { label: 'Total Incidents', value: data.total_incidents, icon: 'fa-bug', color: 'var(--accent-red)', badge: 'Total' },
+    ];
+
+    cards.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'stat-card';
+        div.style.setProperty('--card-color', c.color);
+        div.innerHTML = `
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fa ${c.icon}"></i></div>
+                <span class="stat-card-badge" style="color:${c.color};border-color:${c.color}20;background:${c.color}12">${c.badge}</span>
+            </div>
+            <div class="stat-card-value">${c.value}</div>
+            <div class="stat-card-label">${c.label}</div>
+        `;
+        grid.appendChild(div);
+
+        // Animate value count-up
+        if (typeof c.value === 'number') {
+            let start = 0;
+            const target = c.value;
+            const el = div.querySelector('.stat-card-value');
+            const dur = 1000;
+            const step = Math.max(1, Math.round(target / 40));
+            const interval = setInterval(() => {
+                start = Math.min(start + step, target);
+                el.textContent = start;
+                if (start >= target) clearInterval(interval);
+            }, dur / 40);
+        }
+    });
+
+    // Breakdown charts
+    if (data.trajets_by_statut) {
+        const el = document.getElementById('trajets-breakdown');
+        const total = data.trajets_by_statut.reduce((s, x) => s + x.count, 0);
+        const colors = {planifie:'var(--accent-cyan)', en_cours:'var(--accent-orange)', termine:'var(--accent-green)', annule:'var(--accent-red)'};
+        el.innerHTML = data.trajets_by_statut.map(r => `
+            <div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">
+                    <span style="color:var(--text-muted)">${r.statut}</span>
+                    <span style="color:var(--text-primary);font-family:'Share Tech Mono',monospace">${r.count}</span>
+                </div>
+                <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+                    <div style="height:100%;width:${total > 0 ? (r.count/total*100).toFixed(1) : 0}%;background:${colors[r.statut]||'var(--accent-cyan)'};border-radius:3px;transition:width 1s ease"></div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('breakdown-trajets').style.display = 'block';
+    }
+
+    if (data.vehicules_by_statut) {
+        const el = document.getElementById('vehicules-breakdown');
+        const colors = {actif:'var(--accent-green)', maintenance:'var(--accent-orange)', hors_service:'var(--accent-red)'};
+        const total = data.vehicules_by_statut.reduce((s, x) => s + x.count, 0);
+        el.innerHTML = data.vehicules_by_statut.map(r => `
+            <div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">
+                    <span style="color:var(--text-muted)">${r.statut}</span>
+                    <span style="color:var(--text-primary);font-family:'Share Tech Mono',monospace">${r.count}</span>
+                </div>
+                <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+                    <div style="height:100%;width:${total > 0 ? (r.count/total*100).toFixed(1) : 0}%;background:${colors[r.statut]||'var(--accent-cyan)'};border-radius:3px;transition:width 1s ease"></div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('breakdown-vehicules').style.display = 'block';
+    }
+}
 
     const cards = [
         { label: 'Utilisateurs', value: data.total_users, icon: 'fa-users', color: 'var(--accent-cyan)', badge: 'Actifs' },
